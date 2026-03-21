@@ -53,11 +53,17 @@ body.top{background:#fff!important;}
     black 96%, rgba(0,0,0,0.75) 98.5%, rgba(0,0,0,0.45) 100%);
 }
 
-/* Entrance: paper rises from the ocean */
-#homepage.submerged{
+/* Entrance: paper starts submerged by default */
+#homepage{
   opacity:0;
   transform:translateY(40px);
 }
+/* Returning visitors: skip entrance, show instantly */
+html.hp-instant #homepage{
+  opacity:1;
+  transform:none;
+}
+/* First visit: animate surfacing */
 #homepage.surfacing{
   opacity:1;
   transform:translateY(0);
@@ -233,6 +239,15 @@ body.top{background:#fff!important;}
 
 <!-- Page transition overlay -->
 <div id="page-transition"></div>
+
+<!-- Blocking: decide entrance state before first paint -->
+<script>
+(function(){
+  if(sessionStorage.getItem('hp-typed') || sessionStorage.getItem('dissolve-arriving')){
+    document.documentElement.classList.add('hp-instant');
+  }
+})();
+</script>
 
 <!-- Homepage content -->
 <div id="homepage">
@@ -847,15 +862,10 @@ body.top{background:#fff!important;}
 
     /* ── Case 3: true first visit — "浮出水面" ── */
     sessionStorage.setItem('hp-typed', '1');
-    /* Paper starts submerged */
-    if(hp) hp.classList.add('submerged');
-
-    /* Let the ocean breathe for a moment, then surface */
+    /* #homepage is already hidden via CSS (opacity:0, translateY:40px).
+       Let the ocean breathe for a moment, then surface. */
     setTimeout(function(){
-      if(hp){
-        hp.classList.add('surfacing');
-        hp.classList.remove('submerged');
-      }
+      if(hp) hp.classList.add('surfacing');
       /* Render wet-stain as paper rises */
       if(window.renderWetStain) setTimeout(window.renderWetStain, 400);
       /* Start typing after paper has fully surfaced */
