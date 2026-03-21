@@ -54,18 +54,15 @@ body.top{background:#fff!important;}
 }
 
 /* Entrance: paper rises from the ocean */
-.hp-column.submerged{
+#homepage.submerged{
   opacity:0;
-  filter:blur(6px);
-  transform:translateY(35px);
+  transform:translateY(40px);
 }
-.hp-column.surfacing{
+#homepage.surfacing{
   opacity:1;
-  filter:blur(0px);
   transform:translateY(0);
-  transition:opacity 1.1s cubic-bezier(0.23,1,0.32,1),
-             filter 1.1s cubic-bezier(0.23,1,0.32,1),
-             transform 1.1s cubic-bezier(0.23,1,0.32,1);
+  transition:opacity 1.2s cubic-bezier(0.23,1,0.32,1),
+             transform 1.2s cubic-bezier(0.23,1,0.32,1);
 }
 
 /* Page-transition overlay */
@@ -820,7 +817,7 @@ body.top{background:#fff!important;}
   document.addEventListener('DOMContentLoaded', function(){
     if(window.initOceanBackground) window.initOceanBackground();
 
-    var col = document.querySelector('.hp-column');
+    var hp = document.getElementById('homepage');
     var arriving = sessionStorage.getItem('dissolve-arriving');
     var visited = sessionStorage.getItem('hp-typed');
 
@@ -851,13 +848,13 @@ body.top{background:#fff!important;}
     /* ── Case 3: true first visit — "浮出水面" ── */
     sessionStorage.setItem('hp-typed', '1');
     /* Paper starts submerged */
-    if(col) col.classList.add('submerged');
+    if(hp) hp.classList.add('submerged');
 
     /* Let the ocean breathe for a moment, then surface */
     setTimeout(function(){
-      if(col){
-        col.classList.add('surfacing');
-        col.classList.remove('submerged');
+      if(hp){
+        hp.classList.add('surfacing');
+        hp.classList.remove('submerged');
       }
       /* Render wet-stain as paper rises */
       if(window.renderWetStain) setTimeout(window.renderWetStain, 400);
