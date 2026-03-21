@@ -38,7 +38,8 @@ body.top{background:#fff!important;}
 /* Grid paper column — floats on the ocean */
 .hp-column{
   width:100%;max-width:740px;height:100vh;
-  display:flex;flex-direction:column;padding:3.5vh 5rem;
+  display:grid;grid-template-rows:auto 1fr auto;
+  padding:3.5vh 5rem;
   overflow:hidden;position:relative;
   background:rgba(244,243,238,0.88);
   background-image:
@@ -114,7 +115,11 @@ html.hp-arriving.hp-arrive-fade #page-transition{
   text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;transition:color 0.3s;
 }
 .hp-header__nav a:hover{color:rgba(25,18,70,0.8);}
-.hp-content{flex:1;display:flex;flex-direction:column;justify-content:center;gap:3vh;overflow:hidden;}
+.hp-content{
+  display:flex;flex-direction:column;justify-content:center;gap:3vh;
+  overflow-y:auto;overflow-x:hidden;min-height:0;
+  -webkit-overflow-scrolling:touch;
+}
 .hp-intro__badge{
   font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:rgba(30,22,80,1);
   letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.8vh;
@@ -236,21 +241,12 @@ html.hp-arriving.hp-arrive-fade #page-transition{
 
 /* ── Mobile responsive ── */
 @media(max-width:768px){
-  /* Paper stays 100vh. Switch to grid so content row gets a definite
-     height — required for overflow-y:auto to work on iOS Safari. */
   .hp-column{
-    display:grid;
-    grid-template-rows:auto 1fr auto;
     padding:2.5vh 1.5rem;
     max-width:100%;
   }
   .hp-content{
-    display:flex;flex-direction:column;
     justify-content:flex-start;
-    min-height:0;
-    overflow-y:auto;
-    overflow-x:hidden;
-    -webkit-overflow-scrolling:touch;
     padding-top:1vh;
     gap:2vh;
   }
