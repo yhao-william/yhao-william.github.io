@@ -84,12 +84,15 @@ html.hp-instant #homepage{
   transition:opacity 0.3s ease;
 }
 #page-transition.active{opacity:1;pointer-events:all;}
-#page-transition.ocean-arrive{
+/* Dissolve-arrive: overlay starts visible via html class (blocking script) */
+html.hp-arriving #page-transition{
   background:linear-gradient(180deg,rgba(130,140,210,0.35) 0%,rgba(100,115,210,0.18) 100%);
   opacity:1;pointer-events:all;
+}
+html.hp-arriving.hp-arrive-fade #page-transition{
+  opacity:0;pointer-events:none;
   transition:opacity 0.5s ease-out;
 }
-#page-transition.ocean-arrive.fade-out{opacity:0;pointer-events:none;}
 
 /* Wet-stain overlay — sits above paper bg, below text */
 #wet-stain{
@@ -243,8 +246,13 @@ html.hp-instant #homepage{
 <!-- Blocking: decide entrance state before first paint -->
 <script>
 (function(){
-  if(sessionStorage.getItem('hp-typed') || sessionStorage.getItem('dissolve-arriving')){
+  var typed = sessionStorage.getItem('hp-typed');
+  var arriving = sessionStorage.getItem('dissolve-arriving');
+  if(typed || arriving){
     document.documentElement.classList.add('hp-instant');
+  }
+  if(arriving){
+    document.documentElement.classList.add('hp-arriving');
   }
 })();
 </script>
@@ -840,15 +848,13 @@ html.hp-instant #homepage{
     if(arriving){
       sessionStorage.removeItem('dissolve-arriving');
       if(window.renderWetStain) setTimeout(window.renderWetStain, 200);
-      var ov = document.getElementById('page-transition');
-      if(ov){
-        ov.classList.add('ocean-arrive');
+      /* Overlay is already visible via html.hp-arriving (blocking script).
+         Now trigger the fade-out. */
+      requestAnimationFrame(function(){
         requestAnimationFrame(function(){
-          requestAnimationFrame(function(){
-            ov.classList.add('fade-out');
-          });
+          document.documentElement.classList.add('hp-arrive-fade');
         });
-      }
+      });
       showAllInstant();
       return;
     }
