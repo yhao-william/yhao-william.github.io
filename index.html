@@ -236,14 +236,18 @@ html.hp-arriving.hp-arrive-fade #page-transition{
 
 /* ── Mobile responsive ── */
 @media(max-width:768px){
-  /* Paper stays 100vh. Only text inside scrolls. */
+  /* Paper stays 100vh. Switch to grid so content row gets a definite
+     height — required for overflow-y:auto to work on iOS Safari. */
   .hp-column{
+    display:grid;
+    grid-template-rows:auto 1fr auto;
     padding:2.5vh 1.5rem;
     max-width:100%;
   }
   .hp-content{
+    display:flex;flex-direction:column;
     justify-content:flex-start;
-    min-height:0;            /* allow flex child to shrink below content height */
+    min-height:0;
     overflow-y:auto;
     overflow-x:hidden;
     -webkit-overflow-scrolling:touch;
@@ -886,6 +890,10 @@ html.hp-arriving.hp-arrive-fade #page-transition{
 
   document.addEventListener('DOMContentLoaded', function(){
     if(window.initOceanBackground) window.initOceanBackground();
+
+    /* Ensure content scroll starts at top on mobile */
+    var contentEl = document.querySelector('.hp-content');
+    if(contentEl) contentEl.scrollTop = 0;
 
     var hp = document.getElementById('homepage');
     var arriving = sessionStorage.getItem('dissolve-arriving');
