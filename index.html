@@ -117,9 +117,14 @@ html.hp-arriving.hp-arrive-fade #page-transition{
 .hp-header__nav a:hover{color:rgba(25,18,70,0.8);}
 .hp-content{
   display:flex;flex-direction:column;gap:3vh;
-  padding-top:5vh;
   overflow-y:auto;overflow-x:hidden;min-height:0;
   -webkit-overflow-scrolling:touch;
+}
+/* Spacers replicate justify-content:center but stay scrollable.
+   Grow to fill remaining space (→ centering); capped so whitespace
+   never becomes excessive; collapse to 0 when content overflows. */
+.hp-content::before,.hp-content::after{
+  content:'';flex:1 0 0px;max-height:5vh;
 }
 .hp-intro__badge{
   font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:rgba(30,22,80,1);
