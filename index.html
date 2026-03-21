@@ -39,7 +39,7 @@ body.top{background:#fff!important;}
 .hp-column{
   width:100%;max-width:740px;height:100vh;
   display:grid;grid-template-rows:auto 1fr auto;
-  padding:3.5vh 5rem;
+  padding:3.5vh clamp(1.5rem, 5vw, 5rem);
   overflow:hidden;position:relative;
   background:rgba(244,243,238,0.88);
   background-image:
@@ -117,13 +117,9 @@ html.hp-arriving.hp-arrive-fade #page-transition{
 .hp-header__nav a:hover{color:rgba(25,18,70,0.8);}
 .hp-content{
   display:flex;flex-direction:column;gap:3vh;
+  padding-top:2vh;
   overflow-y:auto;overflow-x:hidden;min-height:0;
   -webkit-overflow-scrolling:touch;
-}
-/* Invisible spacers: grow when content fits (→ centering),
-   collapse to 0 when content overflows (→ scroll from top) */
-.hp-content::before,.hp-content::after{
-  content:'';flex:1 0 0px;
 }
 .hp-intro__badge{
   font-family:'IBM Plex Mono',monospace;font-size:0.72rem;color:rgba(30,22,80,1);
@@ -244,30 +240,11 @@ html.hp-arriving.hp-arrive-fade #page-transition{
 .hp-footer a:hover{color:rgba(25,18,70,0.75);}
 .typed-hidden{visibility:hidden;}.typed-visible{visibility:visible;}
 
-/* ── Mobile responsive ── */
-@media(max-width:768px){
-  .hp-column{
-    padding:2.5vh 1.8rem;
-    max-width:100%;
-  }
-  .hp-header__name{font-size:1.4rem;}
-  .hp-header__nav{gap:1rem;}
-  .hp-header__nav a{font-size:0.68rem;}
-  .hp-blog-item{gap:0.8rem;}
-  .hp-blog-item .date{width:auto;font-size:0.65rem;}
-  .hp-blog-item .title{font-size:0.85rem;}
-  .hp-paper-item .paper-title{font-size:1.05rem;}
-  .hp-paper-item .paper-meta{font-size:0.74rem;}
-  .hp-footer{gap:1rem;}
-  .hp-footer a{font-size:0.65rem;}
-}
-@media(max-width:420px){
-  .hp-column{padding:2vh 1.3rem;}
+/* ── Narrow viewport: structural only, no font-size changes ── */
+@media(max-width:480px){
   .hp-header{flex-wrap:wrap;gap:0.5rem;}
-  .hp-header__nav{gap:0.8rem;}
-  .hp-blog-item{flex-direction:column;gap:0.2rem;}
   .hp-blog-item .date{width:auto;}
-  .hp-footer{flex-wrap:wrap;gap:0.8rem;}
+  .hp-footer{flex-wrap:wrap;}
 }
 </style>
 </head>
