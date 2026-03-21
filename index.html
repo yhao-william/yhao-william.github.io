@@ -216,7 +216,8 @@ html.hp-arriving.hp-arrive-fade #page-transition{
 .hp-blog-item:hover{opacity:0.7;}
 .hp-blog-item .date{font-family:'IBM Plex Mono',monospace;font-size:0.68rem;color:rgba(50,40,130,0.6);flex-shrink:0;width:5.5rem;}
 .hp-blog-item .title{font-family:'IBM Plex Mono',monospace;font-size:0.92rem;color:rgba(25,18,70,0.82);font-weight:400;line-height:1.4;}
-.hp-paper-item{padding:0.6vh 0;opacity:0;transform:translateY(4px);transition:opacity 0.5s ease,transform 0.5s ease;}
+.hp-paper-item{display:block;padding:0.6vh 0;opacity:0;transform:translateY(4px);transition:opacity 0.5s ease,transform 0.5s ease;text-decoration:none;cursor:pointer;}
+.hp-paper-item:hover .paper-title{color:#615eed;}
 .hp-paper-item.typed-visible{opacity:1;transform:translateY(0);}
 .hp-paper-item .paper-title{font-family:'Cormorant Garamond',serif;font-size:1.15rem;font-weight:600;color:rgba(25,18,70,0.88);line-height:1.3;}
 .hp-paper-item .paper-meta{font-size:0.78rem;color:rgba(30,22,80,0.55);line-height:1.5;}
@@ -316,18 +317,18 @@ html.hp-arriving.hp-arrive-fade #page-transition{
       </div>
       <div>
         <div class="hp-sec-label gen typed-hidden" data-type="instant" data-group="5"><span class="tag">output</span> Publications</div>
-        <div class="hp-paper-item typed-hidden" data-type="fade" data-group="6">
+        <a class="hp-paper-item typed-hidden" data-type="fade" data-group="6" href="papers.html#reasoning-traces">
           <div class="paper-title">Reasoning Traces Shape Outputs but Models Won't Say So</div>
           <div class="paper-meta"><strong>Yijie Hao*</strong>, Lingjie Chen*, Ali Emami, Joyce Ho — 2025</div>
-        </div>
-        <div class="hp-paper-item typed-hidden" data-type="fade" data-group="7">
+        </a>
+        <a class="hp-paper-item typed-hidden" data-type="fade" data-group="7" href="papers.html#intent-hallucination">
           <div class="paper-title">Beyond Facts: Evaluating Intent Hallucination in Large Language Models</div>
           <div class="paper-meta"><strong>Yijie Hao</strong>, Haofei Yu, Jiaxuan You — ACL 2025</div>
-        </div>
-        <div class="hp-paper-item typed-hidden" data-type="fade" data-group="8">
+        </a>
+        <a class="hp-paper-item typed-hidden" data-type="fade" data-group="8" href="papers.html#flexgen-ehr">
           <div class="paper-title">A Flexible Generative Model for Heterogeneous Tabular EHR with Missing Modality</div>
           <div class="paper-meta">Huan He*, <strong>Yijie Hao*</strong>, Yuanzhe Xi, Yong Chen, Bradley Malin, Joyce Ho — ICLR 2024</div>
-        </div>
+        </a>
         <div class="hp-bottom-cursor" id="hp-bottom-cursor"><span class="gen-text" id="hp-gen"></span><span class="block">&#x2588;</span></div>
       </div>
     </div>

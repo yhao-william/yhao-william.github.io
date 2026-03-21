@@ -7,8 +7,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
 .page{opacity:0;animation:pageIn 0.35s ease 0.05s forwards;}
 @keyframes pageIn{to{opacity:1;}}
+@keyframes highlightPaper{0%{background:rgba(50,40,130,0.08);}100%{background:transparent;}}
+.paper.highlight{animation:highlightPaper 1.5s ease-out;}
 
 body{
   min-height:100vh;
@@ -267,7 +270,7 @@ body{
       <div class="year-label">2025</div>
 
       <!-- Paper 1: Reasoning Traces -->
-      <div class="paper">
+      <div class="paper" id="reasoning-traces">
         <div class="paper__title">Reasoning Traces Shape Outputs but Models Won't Say So</div>
         <div class="paper__meta"><strong>Yijie Hao*</strong>, Lingjie Chen*, Ali Emami, Joyce Ho</div>
         <span class="paper__venue paper__venue--preprint">Preprint 2025</span>
@@ -306,7 +309,7 @@ body{
       </div>
 
       <!-- Paper 2: Intent Hallucination -->
-      <div class="paper">
+      <div class="paper" id="intent-hallucination">
         <div class="paper__title">Beyond Facts: Evaluating Intent Hallucination in Large Language Models</div>
         <div class="paper__meta"><strong>Yijie Hao</strong>, Haofei Yu, Jiaxuan You</div>
         <span class="paper__venue paper__venue--conf">ACL 2025</span>
@@ -351,7 +354,7 @@ body{
       <div class="year-label">2024</div>
 
       <!-- Paper 3: FlexGen-EHR -->
-      <div class="paper">
+      <div class="paper" id="flexgen-ehr">
         <div class="paper__title">A Flexible Generative Model for Heterogeneous Tabular EHR with Missing Modality</div>
         <div class="paper__meta">Huan He*, <strong>Yijie Hao*</strong>, Yuanzhe Xi, Yong Chen, Bradley Malin, Joyce Ho</div>
         <span class="paper__venue paper__venue--conf">ICLR 2024</span>
@@ -433,6 +436,16 @@ function toggleDetails(btn){
     }
   });
 })();
+
+// Highlight target paper on hash navigation
+if(window.location.hash){
+  var target = document.querySelector(window.location.hash);
+  if(target && target.classList.contains('paper')){
+    setTimeout(function(){
+      target.classList.add('highlight');
+    }, 400);
+  }
+}
 </script>
 </body>
 </html>
