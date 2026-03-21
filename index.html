@@ -77,12 +77,12 @@ body.top{background:#fff!important;}
 
 .hp-header{
   display:flex;justify-content:space-between;align-items:baseline;
-  padding-bottom:2vh;border-bottom:1px solid rgba(30,20,80,0.08);flex-shrink:0;
+  padding-bottom:2vh;border-bottom:1px solid rgba(30,20,80,0.18);flex-shrink:0;
 }
 .hp-header__name{font-family:'Cormorant Garamond',serif;font-size:1.75rem;font-weight:600;color:rgba(25,18,70,0.88);}
 .hp-header__nav{display:flex;gap:1.5rem;}
 .hp-header__nav a{
-  font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:rgba(30,22,80,0.5);
+  font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:rgba(30,22,80,0.85);
   text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;transition:color 0.3s;
 }
 .hp-header__nav a:hover{color:rgba(25,18,70,0.8);}
@@ -107,7 +107,7 @@ body.top{background:#fff!important;}
 .hp-sec-label .tag{font-size:0.65rem;padding:2px 8px;border-radius:3px;transition:all 0.4s;}
 .hp-sec-label.think .tag{color:#3a2d8c;background:rgba(50,40,130,0.1);}
 .hp-sec-label.gen .tag{color:rgba(130,70,20,0.82);background:rgba(140,80,30,0.14);}
-.hp-sec-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(30,22,80,0.1),transparent);}
+.hp-sec-label::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(30,22,80,0.2),transparent);}
 
 /* Chromatic aberration flash on <think> tag */
 .hp-sec-label.think .tag.glitch{
@@ -197,10 +197,10 @@ body.top{background:#fff!important;}
 
 .hp-footer{
   flex-shrink:0;display:flex;justify-content:center;gap:1.5rem;
-  padding-top:2vh;border-top:1px solid rgba(30,22,80,0.08);
+  padding-top:2vh;border-top:1px solid rgba(30,22,80,0.18);
 }
 .hp-footer a{
-  font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:rgba(30,22,80,0.4);
+  font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:rgba(30,22,80,0.85);
   text-decoration:none;letter-spacing:0.04em;transition:color 0.3s;
 }
 .hp-footer a:hover{color:rgba(25,18,70,0.75);}
@@ -777,11 +777,33 @@ body.top{background:#fff!important;}
     tick();
   }
 
-  /* Auto-start typing on page load (no animation phase) */
+  /* Skip typing if already seen this session; otherwise play once */
+  function showAllInstant(){
+    var items = document.querySelectorAll('#homepage [data-group]');
+    items.forEach(function(el){
+      el.classList.remove('typed-hidden');
+      el.classList.add('typed-visible');
+    });
+    /* Show pondering-more and bottom cursor immediately */
+    var pm = document.getElementById('hp-pondering-more');
+    if(pm) pm.classList.add('visible');
+    var bc = document.getElementById('hp-bottom-cursor');
+    if(bc){ bc.classList.add('visible'); startGhostTokens(); }
+    /* Fade-in publications */
+    document.querySelectorAll('.hp-paper-item').forEach(function(el){
+      el.classList.add('typed-visible');
+    });
+  }
+
   document.addEventListener('DOMContentLoaded', function(){
     if(window.initOceanBackground) window.initOceanBackground();
     if(window.renderWetStain) setTimeout(window.renderWetStain, 200);
-    setTimeout(window.startHomepageTyping, 200);
+    if(sessionStorage.getItem('hp-typed')){
+      showAllInstant();
+    } else {
+      sessionStorage.setItem('hp-typed', '1');
+      setTimeout(window.startHomepageTyping, 200);
+    }
   });
 })();
 </script>
