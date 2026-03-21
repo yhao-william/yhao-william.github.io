@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Font Comparison</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;1,400&family=Lora:ital,wght@0,400;1,400&family=Crimson+Text:ital,wght@0,400;1,400&family=Source+Serif+4:ital,wght@0,400;1,400&family=Libre+Baskerville:ital,wght@0,400;1,400&family=Inter:wght@300;400&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  min-height:100vh;
+  display:flex;justify-content:center;
+  background:rgba(244,243,238,0.92);
+  background-image:
+    linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px);
+  background-size:32px 32px;
+  font-family:'Inter',sans-serif;
+  color:rgba(25,18,70,0.85);
+  -webkit-font-smoothing:antialiased;
+}
+.page{
+  width:100%;max-width:700px;
+  padding:4vh 3rem;
+}
+h1{
+  font-family:'Cormorant Garamond',serif;font-size:1.75rem;
+  font-weight:600;color:rgba(25,18,70,0.88);
+  margin-bottom:3vh;
+}
+.sample{
+  margin-bottom:4vh;
+  padding-bottom:3vh;
+  border-bottom:1px solid rgba(30,20,80,0.08);
+}
+.sample:last-child{border-bottom:none;}
+.label{
+  font-family:'IBM Plex Mono',monospace;font-size:0.65rem;
+  color:rgba(50,40,130,0.6);letter-spacing:0.08em;text-transform:uppercase;
+  margin-bottom:1.2vh;
+}
+.bio{
+  font-size:1.02rem;
+  letter-spacing:-0.005em;
+  color:rgba(25,18,70,0.78);
+  line-height:1.85;
+}
+.note{
+  font-family:'IBM Plex Mono',monospace;font-size:0.6rem;
+  color:rgba(30,22,80,0.4);margin-top:0.8vh;
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Font Comparison for Bio</h1>
+
+  <div class="sample">
+    <div class="label">Current — Inter 400 (as-is)</div>
+    <p class="bio" style="font-family:'Inter',sans-serif;font-size:0.96rem;color:rgba(25,18,70,0.82);line-height:1.8;">I want to understand what objectives LLMs actually pursue — not what we trained them to do, but what they learned to do, and whether those diverge when the world shifts beneath them. This is, I think, a core piece of the&nbsp;alignment&nbsp;problem.</p>
+    <div class="note">Your current font. Clean, neutral, technical.</div>
+  </div>
+
+  <div class="sample">
+    <div class="label">1. Lora Regular</div>
+    <p class="bio" style="font-family:'Lora',serif;">I want to understand what objectives LLMs actually pursue — not what we trained them to do, but what they learned to do, and whether those diverge when the world shifts beneath them. This is, I think, a core piece of the&nbsp;alignment&nbsp;problem.</p>
+    <div class="note">Warm, modern serif. Designed for screen. Closest to Tiempos in feel.</div>
+  </div>
+
+  <div class="sample">
+    <div class="label">2. Lora Italic</div>
+    <p class="bio" style="font-family:'Lora',serif;font-style:italic;">I want to understand what objectives LLMs actually pursue — not what we trained them to do, but what they learned to do, and whether those diverge when the world shifts beneath them. This is, I think, a core piece of the&nbsp;alignment&nbsp;problem.</p>
+    <div class="note">Same warmth, more personal. Like handwriting without being decorative.</div>
+  </div>
+
+  <div class="sample">
+    <div class="label">3. Crimson Text Regular</div>
+    <p class="bio" style="font-family:'Crimson Text',serif;">I want to understand what objectives LLMs actually pursue — not what we trained them to do, but what they learned to do, and whether those diverge when the world shifts beneath them. This is, I think, a core piece of the&nbsp;alignment&nbsp;problem.</p>
+    <div class="note">Classical but restrained. A bit more literary.</div>
+  </div>
+
+  <div class="sample">
+    <div class="label">4. Source Serif 4 Regular</div>
+    <p class="bio" style="font-family:'Source Serif 4',serif;">I want to understand what objectives LLMs actually pursue — not what we trained them to do, but what they learned to do, and whether those diverge when the world shifts beneath them. This is, I think, a core piece of the&nbsp;alignment&nbsp;problem.</p>
+    <div class="note">Adobe's open-source serif. Clean, rational, slightly warmer than Inter.</div>
+  </div>
+
+  <div class="sample">
+    <div class="label">5. Libre Baskerville Regular</div>
+    <p class="bio" style="font-family:'Libre Baskerville',serif;">I want to understand what objectives LLMs actually pursue — not what we trained them to do, but what they learned to do, and whether those diverge when the world shifts beneath them. This is, I think, a core piece of the&nbsp;alignment&nbsp;problem.</p>
+    <div class="note">Optimized for body text on screen. Dignified, scholarly.</div>
+  </div>
+
+  <div class="sample">
+    <div class="label">6. Inter Light (300) — subtle tweak</div>
+    <p class="bio" style="font-family:'Inter',sans-serif;font-weight:300;letter-spacing:0.01em;color:rgba(25,18,70,0.72);">I want to understand what objectives LLMs actually pursue — not what we trained them to do, but what they learned to do, and whether those diverge when the world shifts beneath them. This is, I think, a core piece of the&nbsp;alignment&nbsp;problem.</p>
+    <div class="note">Same Inter, but lighter weight + softer color. More breath, same voice.</div>
+  </div>
+
+  <div class="sample">
+    <div class="label">7. Cormorant Garamond Italic (previous attempt)</div>
+    <p class="bio" style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.08rem;">I want to understand what objectives LLMs actually pursue — not what we trained them to do, but what they learned to do, and whether those diverge when the world shifts beneath them. This is, I think, a core piece of the&nbsp;alignment&nbsp;problem.</p>
+    <div class="note">The one you didn't like. Too ornate, too "poetic".</div>
+  </div>
+
+</div>
+</body>
+</html>
