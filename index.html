@@ -123,7 +123,10 @@ html.hp-arriving.hp-arrive-fade #page-transition{
 /* Spacers replicate justify-content:center but stay scrollable.
    Grow to fill remaining space (→ centering); capped so whitespace
    never becomes excessive; collapse to 0 when content overflows. */
-.hp-content::before,.hp-content::after{
+.hp-content::before{
+  content:'';flex:1 0 3vh;max-height:7vh;
+}
+.hp-content::after{
   content:'';flex:1 0 0px;max-height:7vh;
 }
 .hp-intro__badge{
