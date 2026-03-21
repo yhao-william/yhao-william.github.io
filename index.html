@@ -116,7 +116,9 @@ html.hp-arriving.hp-arrive-fade #page-transition{
 }
 .hp-header__nav a:hover{color:rgba(25,18,70,0.8);}
 .hp-content{
-  display:flex;flex-direction:column;justify-content:center;gap:3vh;
+  display:flex;flex-direction:column;gap:3vh;
+  justify-content:flex-start;   /* fallback */
+  justify-content:safe center;  /* center when fits, start when overflows */
   overflow-y:auto;overflow-x:hidden;min-height:0;
   -webkit-overflow-scrolling:touch;
 }
@@ -246,7 +248,6 @@ html.hp-arriving.hp-arrive-fade #page-transition{
     max-width:100%;
   }
   .hp-content{
-    justify-content:flex-start;
     padding-top:1vh;
     gap:2vh;
   }
