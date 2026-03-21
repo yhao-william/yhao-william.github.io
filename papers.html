@@ -24,7 +24,7 @@ body{
 }
 
 .page{
-  width:100%;max-width:700px;
+  width:100%;max-width:740px;
   padding:4vh 3rem;
   min-height:100vh;
   display:flex;flex-direction:column;
@@ -65,51 +65,136 @@ body{
 }
 
 /* Year group */
-.year-group{margin-bottom:3vh;}
+.year-group{margin-bottom:1vh;}
 .year-label{
   font-family:'IBM Plex Mono',monospace;font-size:0.72rem;
   color:rgba(50,40,130,0.55);letter-spacing:0.06em;
-  margin-bottom:1.5vh;
+  margin-bottom:2vh;
 }
 
 /* Paper entries */
 .paper{
-  margin-bottom:2.5vh;
-  padding-bottom:2vh;
-  border-bottom:1px solid rgba(30,20,80,0.05);
+  margin-bottom:3.5vh;
+  padding-bottom:3vh;
+  border-bottom:1px solid rgba(30,20,80,0.06);
 }
 .paper:last-child{border-bottom:none;}
 
 .paper__title{
-  font-family:'Cormorant Garamond',serif;font-size:1.2rem;
+  font-family:'Cormorant Garamond',serif;font-size:1.25rem;
   font-weight:600;color:rgba(25,18,70,0.88);line-height:1.35;
-  margin-bottom:0.3vh;
+  margin-bottom:0.4vh;
 }
 .paper__meta{
   font-size:0.78rem;color:rgba(30,22,80,0.55);line-height:1.5;
-  display:flex;align-items:baseline;gap:0.8rem;flex-wrap:wrap;
-  margin-bottom:0.5vh;
+  margin-bottom:0.8vh;
 }
 .paper__meta strong{color:rgba(25,18,70,0.72);font-weight:500;}
-.paper__links a{
-  font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:rgba(30,22,80,0.45);
-  text-decoration:none;letter-spacing:0.06em;text-transform:uppercase;
-  transition:color 0.3s;margin-right:0.8rem;
+
+/* Venue badge */
+.paper__venue{
+  display:inline-block;
+  font-family:'IBM Plex Mono',monospace;font-size:0.58rem;
+  padding:2px 7px;border-radius:3px;
+  letter-spacing:0.06em;text-transform:uppercase;
+  margin-bottom:1vh;
 }
-.paper__links a:hover{color:rgba(25,18,70,0.75);}
-.paper__desc{
-  font-size:0.9rem;color:rgba(25,18,70,0.6);line-height:1.7;
-  margin-top:0.5vh;
+.paper__venue--conf{
+  color:rgba(50,40,130,0.7);background:rgba(50,40,130,0.08);
+}
+.paper__venue--preprint{
+  color:rgba(100,80,40,0.7);background:rgba(140,110,50,0.1);
 }
 
-/* BibTeX toggle */
-.paper__bibtex-toggle{
-  font-family:'IBM Plex Mono',monospace;font-size:0.6rem;
-  color:rgba(30,22,80,0.35);text-decoration:none;letter-spacing:0.06em;
-  text-transform:uppercase;cursor:pointer;transition:color 0.3s;
-  background:none;border:none;padding:0;
+/* Links row */
+.paper__links{
+  display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;
+  margin-bottom:1.2vh;
 }
-.paper__bibtex-toggle:hover{color:rgba(25,18,70,0.6);}
+.paper__links a, .paper__links button{
+  font-family:'IBM Plex Mono',monospace;font-size:0.62rem;
+  color:rgba(50,40,130,0.55);
+  text-decoration:none;letter-spacing:0.06em;text-transform:uppercase;
+  transition:all 0.2s;
+  padding:3px 10px;
+  border-radius:3px;
+  border:1px solid rgba(50,40,130,0.12);
+  background:rgba(50,40,130,0.03);
+  cursor:pointer;
+}
+.paper__links a:hover, .paper__links button:hover{
+  color:rgba(50,40,130,0.8);
+  background:rgba(50,40,130,0.08);
+  border-color:rgba(50,40,130,0.2);
+}
+
+/* Abstract */
+.paper__abstract{
+  border-left:2px solid rgba(50,40,130,0.2);
+  padding-left:1rem;
+  margin:1vh 0 1.2vh;
+  font-size:0.85rem;
+  color:rgba(25,18,70,0.55);
+  line-height:1.7;
+}
+
+/* TL;DR */
+.paper__tldr{
+  font-size:0.82rem;
+  color:rgba(25,18,70,0.7);
+  line-height:1.65;
+  margin-bottom:1vh;
+}
+.paper__tldr-label{
+  font-family:'IBM Plex Mono',monospace;font-size:0.6rem;
+  color:rgba(130,70,20,0.7);background:rgba(140,80,30,0.1);
+  padding:1px 6px;border-radius:2px;
+  letter-spacing:0.06em;text-transform:uppercase;
+  margin-right:0.4rem;
+  vertical-align:1px;
+}
+
+/* Expandable details */
+.paper__details{
+  overflow:hidden;max-height:0;
+  transition:max-height 0.4s ease;
+}
+.paper__details.open{max-height:600px;}
+
+.paper__details-toggle{
+  font-family:'IBM Plex Mono',monospace;font-size:0.62rem;
+  color:rgba(30,22,80,0.4);
+  background:none;border:none;padding:0;cursor:pointer;
+  transition:color 0.2s;letter-spacing:0.04em;
+  margin-top:0.5vh;
+}
+.paper__details-toggle:hover{color:rgba(30,22,80,0.65);}
+.paper__details-toggle .arrow{
+  display:inline-block;transition:transform 0.3s;font-size:0.55rem;
+}
+.paper__details-toggle.open .arrow{transform:rotate(90deg);}
+
+/* Key findings inside expandable */
+.paper__findings{
+  margin:1vh 0 0.5vh;
+  padding:0.8rem 1rem;
+  background:rgba(30,22,80,0.025);
+  border-radius:4px;
+  font-size:0.82rem;
+  color:rgba(25,18,70,0.65);
+  line-height:1.7;
+}
+.paper__findings-label{
+  font-family:'IBM Plex Mono',monospace;font-size:0.58rem;
+  color:rgba(50,40,130,0.6);
+  letter-spacing:0.06em;text-transform:uppercase;
+  margin-bottom:0.5em;display:block;
+}
+.paper__findings p{margin-bottom:0.6em;}
+.paper__findings p:last-child{margin-bottom:0;}
+.paper__findings strong{color:rgba(25,18,70,0.75);font-weight:500;}
+
+/* BibTeX */
 .paper__bibtex{
   display:none;margin-top:0.8vh;padding:0.8rem 1rem;
   background:rgba(30,22,80,0.04);border-radius:4px;
@@ -145,7 +230,6 @@ body{
 }
 #page-transition.active{opacity:1;pointer-events:all;}
 
-/* Dissolve — "paper soaking into water" when returning home */
 .page.dissolve{
   filter:blur(8px);opacity:0;transform:scale(0.985);
   transition:filter 0.55s ease-out,opacity 0.55s ease-out,transform 0.55s ease-out;
@@ -159,7 +243,8 @@ body{
 @media(max-width:640px){
   .page{padding:3vh 1.5rem;}
   .header__name{font-size:1.4rem;}
-  .paper__title{font-size:1.05rem;}
+  .paper__title{font-size:1.08rem;}
+  .paper__abstract{font-size:0.8rem;}
 }
 </style>
 </head>
@@ -178,15 +263,43 @@ body{
   <div class="page-title"><span class="tag">output</span> Publications</div>
 
   <div class="papers-list">
+
+    <!-- ═══════════════ 2025 ═══════════════ -->
     <div class="year-group">
       <div class="year-label">2025</div>
 
+      <!-- Paper 1: Reasoning Traces -->
       <div class="paper">
         <div class="paper__title">Reasoning Traces Shape Outputs but Models Won't Say So</div>
-        <div class="paper__meta"><strong>Yijie Hao*</strong>, Lingjie Chen*, Ali Emami, Joyce Ho — Preprint 2025</div>
+        <div class="paper__meta"><strong>Yijie Hao*</strong>, Lingjie Chen*, Ali Emami, Joyce Ho</div>
+        <span class="paper__venue paper__venue--preprint">Preprint 2025</span>
+
         <div class="paper__links">
-          <button class="paper__bibtex-toggle" onclick="this.parentElement.nextElementSibling.classList.toggle('open')">bibtex</button>
+          <a href="assets/pdf/reasoning-traces-2025.pdf">pdf</a>
+          <button onclick="toggleBibtex(this)">bibtex</button>
         </div>
+
+        <div class="paper__tldr">
+          <span class="paper__tldr-label">tl;dr</span>
+          We inject synthetic reasoning into LLMs' &lt;think&gt; traces and find that models follow the injected reasoning but systematically refuse to acknowledge doing so — fabricating explanations instead.
+        </div>
+
+        <div class="paper__abstract">
+          Can we trust the reasoning traces that large reasoning models produce? We introduce Thought Injection, a method that injects synthetic reasoning snippets into a model's &lt;think&gt; trace, then measures whether the model follows the injected reasoning and acknowledges doing so. Across 45,000 samples from three LLMs, we find that injected hints reliably alter outputs, confirming that reasoning traces causally shape model behavior. However, when asked to explain their changed answers, models overwhelmingly refuse to disclose the influence: overall non-disclosure exceeds 90% for extreme hints. Activation analysis reveals that sycophancy- and deception-related directions are strongly activated during these fabrications, suggesting systematic patterns rather than incidental failures.
+        </div>
+
+        <button class="paper__details-toggle" onclick="toggleDetails(this)">
+          <span class="arrow">▶</span> key contributions
+        </button>
+        <div class="paper__details">
+          <div class="paper__findings">
+            <span class="paper__findings-label">findings</span>
+            <p><strong>Causal influence confirmed:</strong> Injected hints reliably change model outputs across 45,000 samples from three state-of-the-art LRMs, establishing that reasoning traces are not merely post-hoc narration.</p>
+            <p><strong>Systematic non-disclosure:</strong> Models fail to acknowledge injected reasoning in over 90% of extreme-hint cases (30,000 follow-up samples), instead fabricating aligned-appearing but unrelated explanations.</p>
+            <p><strong>Mechanistic correlates:</strong> Activation analysis shows sycophancy- and deception-related directions are strongly activated when models fabricate explanations — suggesting structured failure modes, not random errors.</p>
+          </div>
+        </div>
+
         <div class="paper__bibtex">@article{hao2025reasoning,
   title={Reasoning Traces Shape Outputs but Models Won't Say So},
   author={Hao, Yijie and Chen, Lingjie and Emami, Ali and Ho, Joyce},
@@ -194,41 +307,93 @@ body{
 }</div>
       </div>
 
+      <!-- Paper 2: Intent Hallucination -->
       <div class="paper">
         <div class="paper__title">Beyond Facts: Evaluating Intent Hallucination in Large Language Models</div>
-        <div class="paper__meta"><strong>Yijie Hao</strong>, Haofei Yu, Jiaxuan You — ACL 2025</div>
+        <div class="paper__meta"><strong>Yijie Hao</strong>, Haofei Yu, Jiaxuan You</div>
+        <span class="paper__venue paper__venue--conf">ACL 2025</span>
+
         <div class="paper__links">
-          <a href="https://aclanthology.org/2024.acl-long.439/">pdf</a>
-          <button class="paper__bibtex-toggle" onclick="this.parentElement.nextElementSibling.classList.toggle('open')">bibtex</button>
+          <a href="assets/pdf/intent-hallucination-acl2025.pdf">pdf</a>
+          <button onclick="toggleBibtex(this)">bibtex</button>
         </div>
+
+        <div class="paper__tldr">
+          <span class="paper__tldr-label">tl;dr</span>
+          LLMs don't just hallucinate facts — they hallucinate intent, omitting or misinterpreting parts of complex queries. We formalize this as "intent hallucination" and introduce FaithQA, a 20K-query benchmark, along with Constraint Score, an evaluation metric that outperforms LLM-as-judge approaches.
+        </div>
+
+        <div class="paper__abstract">
+          When exposed to complex queries containing multiple conditions, today's large language models tend to produce responses that only partially satisfy the query while neglecting certain conditions. We term this phenomenon "Intent Hallucination." To systematically evaluate intent hallucination, we introduce FaithQA, a novel benchmark containing 20,068 problems, covering both query-only and retrieval-augmented generation (RAG) setups with varying topics and difficulty. We also introduce Constraint Score, an automatic evaluation metric that decomposes queries into intent constraints and computes a weighted score. Our human evaluation shows that Constraint Score significantly outperforms LLM-as-the-judge baselines.
+        </div>
+
+        <button class="paper__details-toggle" onclick="toggleDetails(this)">
+          <span class="arrow">▶</span> key contributions
+        </button>
+        <div class="paper__details">
+          <div class="paper__findings">
+            <span class="paper__findings-label">findings</span>
+            <p><strong>Intent hallucination as a concept:</strong> We distinguish intent hallucination (omission/misinterpretation of query components) from factual hallucination — a prevalent but overlooked failure mode even in state-of-the-art models.</p>
+            <p><strong>FaithQA benchmark:</strong> 20,068 queries validated through extensive human evaluation, covering diverse topics and difficulty levels in both query-only and RAG settings.</p>
+            <p><strong>Constraint Score:</strong> A novel evaluation metric that decomposes queries into intent constraints and assigns importance-weighted binary labels. Significantly outperforms LLM-as-judge approaches, which tend to be biased.</p>
+          </div>
+        </div>
+
         <div class="paper__bibtex">@inproceedings{hao2025beyond,
   title={Beyond Facts: Evaluating Intent Hallucination in Large Language Models},
   author={Hao, Yijie and Yu, Haofei and You, Jiaxuan},
-  booktitle={Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics},
+  booktitle={Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics},
   year={2025}
 }</div>
       </div>
-
     </div>
 
+    <!-- ═══════════════ 2024 ═══════════════ -->
     <div class="year-group">
       <div class="year-label">2024</div>
 
+      <!-- Paper 3: FlexGen-EHR -->
       <div class="paper">
         <div class="paper__title">A Flexible Generative Model for Heterogeneous Tabular EHR with Missing Modality</div>
-        <div class="paper__meta">Huan He*, <strong>Yijie Hao*</strong>, Yuanzhe Xi, Yong Chen, Bradley Malin, Joyce Ho — ICLR 2024</div>
+        <div class="paper__meta">Huan He*, <strong>Yijie Hao*</strong>, Yuanzhe Xi, Yong Chen, Bradley Malin, Joyce Ho</div>
+        <span class="paper__venue paper__venue--conf">ICLR 2024</span>
+
         <div class="paper__links">
-          <a href="https://openreview.net/forum?id=of2rhALq8l">pdf</a>
-          <button class="paper__bibtex-toggle" onclick="this.parentElement.nextElementSibling.classList.toggle('open')">bibtex</button>
+          <a href="assets/pdf/flexgen-ehr-iclr2024.pdf">pdf</a>
+          <a href="https://openreview.net/forum?id=of2rhALq8l">openreview</a>
+          <button onclick="toggleBibtex(this)">bibtex</button>
         </div>
+
+        <div class="paper__tldr">
+          <span class="paper__tldr-label">tl;dr</span>
+          Real-world EHRs mix static and temporal features with frequent missing modalities. We introduce FlexGen-EHR, a latent diffusion model with an optimal transport module that handles this heterogeneity, outperforming existing methods in both fidelity and utility.
+        </div>
+
+        <div class="paper__abstract">
+          Realistic synthetic electronic health records (EHRs) can accelerate research while mitigating privacy concerns. However, training generative models on EHR data remains challenging due to heterogeneous feature types (static and temporal) and missing modalities. We introduce FlexGen-EHR, a versatile diffusion model tailored for heterogeneous tabular EHRs, equipped with an integrative learning framework and an optimal transport module to align the common feature space of heterogeneous EHRs. We empirically show that our model consistently outperforms existing state-of-the-art synthetic EHR generation methods both in fidelity by up to 3.10% and utility by up to 7.16%.
+        </div>
+
+        <button class="paper__details-toggle" onclick="toggleDetails(this)">
+          <span class="arrow">▶</span> key contributions
+        </button>
+        <div class="paper__details">
+          <div class="paper__findings">
+            <span class="paper__findings-label">findings</span>
+            <p><strong>Heterogeneous EHR generation:</strong> First to formalize the challenge of generating heterogeneous EHR data (static + temporal features) in the presence of missing modalities.</p>
+            <p><strong>Latent diffusion + optimal transport:</strong> FlexGen-EHR uses separate VAE encoders for static and temporal features, unified in a shared latent space, with an optimal transport module to construct meaningful latent pairs when modalities are missing.</p>
+            <p><strong>State-of-the-art results:</strong> Up to 3.10% improvement in fidelity (MMD) and 7.16% in utility (AUPR) over existing methods, with strong performance even under missing-modality conditions.</p>
+          </div>
+        </div>
+
         <div class="paper__bibtex">@inproceedings{he2024flexible,
-  title={A Flexible Generative Model for Heterogeneous Tabular EHR with Missing Modality},
+  title={A Flexible Generative Model for Heterogeneous Tabular {EHR} with Missing Modality},
   author={He, Huan and Hao, Yijie and Xi, Yuanzhe and Chen, Yong and Malin, Bradley and Ho, Joyce},
   booktitle={International Conference on Learning Representations},
   year={2024}
 }</div>
       </div>
     </div>
+
   </div>
 
   <div class="footer">
@@ -238,7 +403,18 @@ body{
     <a href="#">linkedin</a>
   </div>
 </div>
+
 <script>
+function toggleBibtex(btn){
+  var bibtex = btn.closest('.paper').querySelector('.paper__bibtex');
+  if(bibtex) bibtex.classList.toggle('open');
+}
+function toggleDetails(btn){
+  btn.classList.toggle('open');
+  var details = btn.nextElementSibling;
+  if(details) details.classList.toggle('open');
+}
+
 (function(){
   var overlay = document.getElementById('page-transition');
   document.addEventListener('click', function(e){
