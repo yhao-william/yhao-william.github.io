@@ -13,6 +13,7 @@
 .page{opacity:0;animation:pageIn 0.35s ease 0.05s forwards;}
 @keyframes pageIn{to{opacity:1;}}
 
+html,body{overflow-x:hidden;}
 body{
   min-height:100vh;
   display:flex;justify-content:center;
@@ -31,6 +32,7 @@ body{
   padding:4vh 3rem;
   min-height:100vh;
   display:flex;flex-direction:column;
+  overflow-x:hidden;
 }
 
 .header{
@@ -87,6 +89,8 @@ body{
 .article-body{
   line-height:1.78;
   font-size:0.95rem;
+  word-break:break-word;
+  overflow-wrap:break-word;
 }
 .article-body p{
   margin-bottom:1.6em;
