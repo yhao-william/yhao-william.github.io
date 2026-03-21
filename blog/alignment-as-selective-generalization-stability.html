@@ -704,6 +704,7 @@ document.querySelectorAll('.note-ref').forEach(function(ref){
     if(isHome){
       document.querySelector('.page').classList.add('dissolve');
       if(overlay) overlay.classList.add('ocean');
+      sessionStorage.setItem('dissolve-arriving','1');
       setTimeout(function(){ window.location.href = href; }, 580);
     } else {
       if(overlay) overlay.classList.add('active');

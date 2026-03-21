@@ -65,6 +65,12 @@ body.top{background:#fff!important;}
   transition:opacity 0.3s ease;
 }
 #page-transition.active{opacity:1;pointer-events:all;}
+#page-transition.ocean-arrive{
+  background:linear-gradient(180deg,rgba(130,140,210,0.35) 0%,rgba(100,115,210,0.18) 100%);
+  opacity:1;pointer-events:all;
+  transition:opacity 0.5s ease-out;
+}
+#page-transition.ocean-arrive.fade-out{opacity:0;pointer-events:none;}
 
 /* Wet-stain overlay — sits above paper bg, below text */
 #wet-stain{
@@ -798,6 +804,22 @@ body.top{background:#fff!important;}
   document.addEventListener('DOMContentLoaded', function(){
     if(window.initOceanBackground) window.initOceanBackground();
     if(window.renderWetStain) setTimeout(window.renderWetStain, 200);
+
+    /* Dissolve-arrive: if coming back from a sub-page, show ocean overlay then fade it out */
+    var arriving = sessionStorage.getItem('dissolve-arriving');
+    if(arriving){
+      sessionStorage.removeItem('dissolve-arriving');
+      var ov = document.getElementById('page-transition');
+      if(ov){
+        ov.classList.add('ocean-arrive');
+        requestAnimationFrame(function(){
+          requestAnimationFrame(function(){
+            ov.classList.add('fade-out');
+          });
+        });
+      }
+    }
+
     if(sessionStorage.getItem('hp-typed')){
       showAllInstant();
     } else {
