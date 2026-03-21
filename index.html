@@ -863,11 +863,13 @@ html.hp-instant #homepage{
     /* ── Case 3: true first visit — "浮出水面" ── */
     sessionStorage.setItem('hp-typed', '1');
     /* #homepage is already hidden via CSS (opacity:0, translateY:40px).
-       Let the ocean breathe for a moment, then surface. */
+       Render wet-stain NOW while paper is invisible, so it's ready
+       before the paper surfaces — no "clean white" flash. */
+    if(window.renderWetStain) window.renderWetStain();
+
+    /* Let the ocean breathe for a moment, then surface */
     setTimeout(function(){
       if(hp) hp.classList.add('surfacing');
-      /* Render wet-stain as paper rises */
-      if(window.renderWetStain) setTimeout(window.renderWetStain, 400);
       /* Start typing after paper has fully surfaced */
       setTimeout(function(){
         if(window.startHomepageTyping) window.startHomepageTyping();
