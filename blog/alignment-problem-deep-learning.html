@@ -262,6 +262,17 @@ body{
 }
 #page-transition.active{opacity:1;pointer-events:all;}
 
+/* Dissolve — "paper soaking into water" when returning home */
+.page.dissolve{
+  filter:blur(8px);opacity:0;transform:scale(0.985);
+  transition:filter 0.55s ease-out,opacity 0.55s ease-out,transform 0.55s ease-out;
+}
+#page-transition.ocean{
+  background:linear-gradient(180deg,rgba(130,140,210,0.35) 0%,rgba(100,115,210,0.18) 100%);
+  opacity:1;pointer-events:all;
+  transition:opacity 0.55s ease-out;
+}
+
 .note-inline{
   display:block;
   font-family:'IBM Plex Mono',monospace;
@@ -667,6 +678,27 @@ document.querySelectorAll('.note-ref').forEach(function(ref){
     this.classList.remove('active');
   });
 });
+
+// Page transition
+(function(){
+  var overlay = document.getElementById('page-transition');
+  document.addEventListener('click', function(e){
+    var link = e.target.closest('a');
+    if(!link) return;
+    var href = link.getAttribute('href');
+    if(!href || href === '#' || href.startsWith('mailto:') || href.startsWith('http')) return;
+    e.preventDefault();
+    var isHome = (href === 'index.html' || href === '../index.html');
+    if(isHome){
+      document.querySelector('.page').classList.add('dissolve');
+      if(overlay) overlay.classList.add('ocean');
+      setTimeout(function(){ window.location.href = href; }, 580);
+    } else {
+      if(overlay) overlay.classList.add('active');
+      setTimeout(function(){ window.location.href = href; }, 320);
+    }
+  });
+})();
 </script>
 </body>
 </html>
