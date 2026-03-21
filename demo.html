@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>Demo Animation Sequence</title>
+<meta content="Full intro animation demo: loader → ocean glitch → recovery flicker → CRT shutdown → redirect" name="description"/>
+<meta content="telephone=no" name="format-detection"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://cdn.jsdelivr.net/npm/yakuhanjp@3.3.1/dist/css/yakuhanjp-noto.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Noto+Serif+SC:wght@400;500;600;700;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+<link href="https://use.typekit.net/mzr1lbz.css" rel="stylesheet"/>
+<link href="assets/css/common.css" rel="stylesheet"/>
+<link href="assets/css/page/top.css" rel="stylesheet"/>
+<link href="assets/css/page/personal.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* Demo page: ensure black background behind loader (overrides personal.css transparent body) */
+html { background: #000 !important; }
+</style>
+</head>
+<body class="top" data-canvasmode="white">
+
+<!-- Fluid gradient background (WebGL). Falls back to a static CSS gradient if WebGL is unavailable. -->
+<canvas id="fluid-bg" class="fluid-bg" aria-hidden="true"></canvas>
+
+<!-- Existing canvas used by the original template (kept for its subtle particle layer) -->
+<canvas class="js-canvas" aria-hidden="true"></canvas>
+<div class="loader" aria-hidden="true">
+    <div class="loader__blks">
+        <div class="blk" data-index="0"></div>
+        <div class="blk" data-index="1"></div>
+        <div class="blk" data-index="2"></div>
+        <div class="blk" data-index="3"></div>
+        <div class="blk" data-index="4"></div>
+        <div class="blk" data-index="5"></div>
+        <div class="blk" data-index="6"></div>
+        <div class="blk" data-index="7"></div>
+        <div class="blk" data-index="8"></div>
+        <div class="blk" data-index="9"></div>
+        <div class="blk" data-index="10"></div>
+        <div class="blk" data-index="11"></div>
+        <div class="blk" data-index="12"></div>
+        <div class="blk" data-index="13"></div>
+        <div class="blk" data-index="14"></div>
+        <div class="blk" data-index="15"></div>
+        <div class="blk" data-index="16"></div>
+        <div class="blk" data-index="17"></div>
+        <div class="blk" data-index="18"></div>
+        <div class="blk" data-index="19"></div>
+        <div class="blk" data-index="20"></div>
+    </div>
+
+    <div class="loader__blks">
+        <div class="blk2" data-index="0"></div>
+        <div class="blk2" data-index="1"></div>
+        <div class="blk2" data-index="2"></div>
+        <div class="blk2" data-index="3"></div>
+        <div class="blk2" data-index="4"></div>
+        <div class="blk2" data-index="5"></div>
+        <div class="blk2" data-index="6"></div>
+        <div class="blk2" data-index="7"></div>
+        <div class="blk2" data-index="8"></div>
+        <div class="blk2" data-index="9"></div>
+        <div class="blk2" data-index="10"></div>
+        <div class="blk2" data-index="11"></div>
+        <div class="blk2" data-index="12"></div>
+        <div class="blk2" data-index="13"></div>
+        <div class="blk2" data-index="14"></div>
+        <div class="blk2" data-index="15"></div>
+        <div class="blk2" data-index="16"></div>
+        <div class="blk2" data-index="17"></div>
+        <div class="blk2" data-index="18"></div>
+        <div class="blk2" data-index="19"></div>
+        <div class="blk2" data-index="20"></div>
+    </div>
+
+    <div class="loader__logo js-loaderlogo" aria-label="Powerful AI System… to Properly Aligned.">
+        <!-- 19 fixed slots so shared letters can stay in place (P at index 0, A at index 9) -->
+        <span data-final="P">P</span>
+        <span data-final="r">o</span>
+        <span data-final="o">w</span>
+        <span data-final="p">e</span>
+        <span data-final="e">r</span>
+        <span data-final="r">f</span>
+        <span data-final="l">u</span>
+        <span data-final="y">l</span>
+        <span class="sp" data-final=" ">&nbsp;</span>
+        <span data-final="A">A</span>
+        <span data-final="l">I</span>
+        <span data-final="i">&nbsp;</span>
+        <span data-final="g">S</span>
+        <span data-final="n">y</span>
+        <span data-final="e">s</span>
+        <span data-final="d">t</span>
+        <span data-final=".">e</span>
+        <span data-final="">m</span>
+        <span data-final="">…</span>
+    </div>
+
+    <div class="ttl -t1">Loading...</div>
+    <div class="ttl -t2">Loading...</div>
+    <div class="ttl -t3">Loading...</div>
+</div>
+
+<header class="l-header">
+<button aria-label="Close navigation" class="l-header__close js-gnav_close"></button>
+<div class="c-grid">
+<div class="c-innerfullgrid">
+<div class="l-header__inner">
+<nav class="l-gnav c-sans">
+<div class="l-gnav__item -active"><a class="js-smoothscroll" href="#introduction">Introduction</a></div><div class="l-gnav__item"><a class="js-smoothscroll" href="#news">News</a></div><div class="l-gnav__item"><a class="js-smoothscroll" href="#publication">Publication</a></div><div class="l-gnav__item"><a class="js-smoothscroll" href="#blogs">Blogs</a></div></nav>
+</div>
+</div>
+</div>
+</header>
+<main class="l-main" id="top">
+
+    <!-- 主视觉首屏：参考原版结构，提供全屏背景图 -->
+    <section class="mainvisual js-mainvisual" data-activekv="1">
+        <div class="mainvisual__wrapper">
+            <div class="mainvisual__phwrap">
+                <div class="mainvisual__ph" data-kv="1"></div>
+            </div>
+        </div>
+        <!-- TD-style glitch canvas overlays the ocean image -->
+        <canvas id="glitch-canvas" aria-hidden="true"></canvas>
+    </section>
+    <div class="ocean-scroll-spacer"></div>
+</main>
+
+<!-- TD-style glitch: scroll-driven WebGL feedback + noise displacement + chromatic aberration -->
+<script>
+(function(){
+  var mv = document.querySelector('.js-mainvisual');
+  var spacerEl = document.querySelector('.ocean-scroll-spacer');
+  if(!mv) return;
+
+  /* ---- DEMO: Always play the full animation sequence ---- */
+
+  var canvas = document.getElementById('glitch-canvas');
+  var gl = canvas.getContext('webgl', { preserveDrawingBuffer: true });
+  if(!gl){ console.warn('No WebGL'); return; }
+
+  /* ---- Accessibility: skip all animations if user prefers reduced motion ---- */
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+    mv.style.display = 'none';
+    document.body.classList.add('page-ready');
+    window.location.href = 'index.html';
+    return;
+  }
+
+  /* ---- Ocean phase waits for loader to finish ---- */
+  /* Order: loader → ocean → CRT → redirect */
+  var loaderDone = false;
+
+  function beginOceanPhase(){
+    document.body.classList.add('ocean-active');
+    loaderDone = true;
+  }
+
+  /* Listen for loader completion signal from intro.js */
+  if(window.loaderFinished){
+    /* Loader already done (repeat visit / fast path) */
+    beginOceanPhase();
+  } else {
+    window.onLoaderFinished = beginOceanPhase;
+  }
+
+  /* ---- Shader sources ---- */
+  var VERT = [
+    'attribute vec2 a_pos;',
+    'uniform vec4 u_coverUV;', /* x=offsetX, y=offsetY, z=scaleX, w=scaleY */
+    'varying vec2 v_uv;',
+    'void main(){',
+    '  vec2 rawUV = a_pos * 0.5 + 0.5;',
+    '  v_uv = u_coverUV.xy + rawUV * u_coverUV.zw;',
+    '  gl_Position = vec4(a_pos, 0.0, 1.0);',
+    '}'
+  ].join('\n');
+
+  var FRAG_GLITCH = [
+    'precision highp float;',
+    'uniform sampler2D u_image;',
+    'uniform sampler2D u_feedback;',
+    'uniform float u_progress;',
+    'uniform float u_time;',
+    'uniform vec2 u_resolution;',
+    'varying vec2 v_uv;',
+
+    'vec3 mod289(vec3 x){return x-floor(x*(1.0/289.0))*289.0;}',
+    'vec2 mod289(vec2 x){return x-floor(x*(1.0/289.0))*289.0;}',
+    'vec3 permute(vec3 x){return mod289(((x*34.0)+1.0)*x);}',
+
+    'float snoise(vec2 v){',
+    '  const vec4 C=vec4(0.211324865405187,0.366025403784439,-0.577350269189626,0.024390243902439);',
+    '  vec2 i=floor(v+dot(v,C.yy));',
+    '  vec2 x0=v-i+dot(i,C.xx);',
+    '  vec2 i1=(x0.x>x0.y)?vec2(1.0,0.0):vec2(0.0,1.0);',
+    '  vec4 x12=x0.xyxy+C.xxzz; x12.xy-=i1;',
+    '  i=mod289(i);',
+    '  vec3 p=permute(permute(i.y+vec3(0.0,i1.y,1.0))+i.x+vec3(0.0,i1.x,1.0));',
+    '  vec3 m=max(0.5-vec3(dot(x0,x0),dot(x12.xy,x12.xy),dot(x12.zw,x12.zw)),0.0);',
+    '  m=m*m; m=m*m;',
+    '  vec3 x=2.0*fract(p*C.www)-1.0;',
+    '  vec3 h=abs(x)-0.5;',
+    '  vec3 ox=floor(x+0.5);',
+    '  vec3 a0=x-ox;',
+    '  m*=1.79284291400159-0.85373472095314*(a0*a0+h*h);',
+    '  vec3 g;',
+    '  g.x=a0.x*x0.x+h.x*x0.y;',
+    '  g.yz=a0.yz*x12.xz+h.yz*x12.yw;',
+    '  return 130.0*dot(m,g);',
+    '}',
+
+    'float fbm(vec2 p){',
+    '  float v=0.0,a=0.5;',
+    '  mat2 rot=mat2(cos(0.5),sin(0.5),-sin(0.5),cos(0.5));',
+    '  for(int i=0;i<5;i++){v+=a*snoise(p);p=rot*p*2.0;a*=0.5;}',
+    '  return v;',
+    '}',
+
+    'void main(){',
+    '  vec2 uv=v_uv;',
+    '  float p=u_progress;',
+    '  float t=u_time;',
+
+    '  // Noise displacement — aggressive',
+    '  float ds=p*p*0.35;',
+    '  float n1=fbm(uv*3.0+t*0.5);',
+    '  float n2=fbm(uv*5.0-t*0.35+10.0);',
+    '  vec2 displaced=uv+vec2(n1,n2)*ds;',
+
+    '  // Chromatic aberration — strong',
+    '  float cs=p*p*0.10;',
+    '  float cn=snoise(uv*8.0+t*0.7);',
+    '  vec2 co=vec2(cn,-cn)*cs;',
+
+    '  float r=texture2D(u_image,displaced+co).r;',
+    '  float g=texture2D(u_image,displaced).g;',
+    '  float b=texture2D(u_image,displaced-co).b;',
+    '  vec3 color=vec3(r,g,b);',
+
+    '  // Feedback blend — stronger recursive layering',
+    '  float fs=smoothstep(0.03,0.4,p)*0.92;',
+    '  vec2 fuv=uv+vec2(',
+    '    snoise(uv*4.0+t*0.2)*0.018*p,',
+    '    snoise(uv*4.0-t*0.15+5.0)*0.018*p',
+    '  );',
+    '  vec3 fb=texture2D(u_feedback,fuv).rgb;',
+    '  color=mix(color,fb,fs);',
+
+    '  // Pixel drift bands — wider, earlier',
+    '  float bp=smoothstep(0.15,0.6,p);',
+    '  float bn=snoise(vec2(uv.y*25.0+t*3.0,t*0.7));',
+    '  if(bp>0.0 && abs(bn)>(1.0-bp*0.9)){',
+    '    float drift=bn*bp*0.22;',
+    '    vec2 duv=displaced+vec2(drift,0.0);',
+    '    color.r=texture2D(u_image,duv+co*2.5).r;',
+    '    color.g=texture2D(u_image,duv).g;',
+    '    color.b=texture2D(u_image,duv-co*2.5).b;',
+    '  }',
+
+    '  // Color contamination — earlier and stronger',
+    '  float cp=smoothstep(0.3,0.85,p);',
+    '  vec3 tint=vec3(',
+    '    0.2+0.8*sin(t*1.8+uv.x*8.0),',
+    '    0.2+0.8*sin(t*1.2+uv.y*6.0+2.0),',
+    '    0.5+0.5*sin(t*2.2+uv.x*4.0+4.0)',
+    '  );',
+    '  color=mix(color,color*tint,cp*0.55);',
+
+    '  // Edge dissolution',
+    '  float dissolve=smoothstep(0.75,1.0,p);',
+    '  float dn=fbm(uv*6.0+t*1.0);',
+    '  color=mix(color,vec3(dn*0.3+0.1,dn*0.15,dn*0.4+0.2),dissolve*dissolve);',
+
+    '  // Micro-jitter — more intense',
+    '  float jitter=snoise(uv*80.0+t*25.0)*0.04*p;',
+    '  color+=vec3(jitter);',
+
+    '  // CRT scanlines',
+    '  float sl=sin(v_uv.y*u_resolution.y*1.5)*0.5+0.5;',
+    '  color*=1.0-sl*0.08*p;',
+
+    '  gl_FragColor=vec4(clamp(color,0.0,1.0),1.0);',
+    '}'
+  ].join('\n');
+
+  var FRAG_COPY = [
+    'precision highp float;',
+    'uniform sampler2D u_tex;',
+    'varying vec2 v_uv;',
+    'void main(){gl_FragColor=texture2D(u_tex,v_uv);}'
+  ].join('\n');
+
+  /* ---- Compile ---- */
+  function mkShader(type, src){
+    var s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s);
+    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){console.error(gl.getShaderInfoLog(s));return null;}
+    return s;
+  }
+  function mkProg(vs,fs){
+    var p=gl.createProgram();
+    gl.attachShader(p,mkShader(gl.VERTEX_SHADER,vs));
+    gl.attachShader(p,mkShader(gl.FRAGMENT_SHADER,fs));
+    gl.linkProgram(p);
+    if(!gl.getProgramParameter(p,gl.LINK_STATUS)){console.error(gl.getProgramInfoLog(p));return null;}
+    return p;
+  }
+  var progGlitch=mkProg(VERT,FRAG_GLITCH);
+  var progCopy=mkProg(VERT,FRAG_COPY);
+
+  /* ---- Fullscreen quad ---- */
+  var quad=gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER,quad);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+
+  function bindQuad(prog){
+    var loc=gl.getAttribLocation(prog,'a_pos');
+    gl.enableVertexAttribArray(loc);
+    gl.bindBuffer(gl.ARRAY_BUFFER,quad);
+    gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+  }
+
+  /* ---- Textures ---- */
+  function mkTex(){
+    var tex=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,tex);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+    return tex;
+  }
+  function mkFBO(w,h){
+    var tex=mkTex();
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
+    var fb=gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER,fb);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,tex,0);
+    gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+    return {fb:fb,tex:tex};
+  }
+
+  /* ---- Load image ---- */
+  var imageTex=mkTex();
+  var imageLoaded=false;
+  var imgW=1, imgH=1;
+  var img=new Image();
+  img.onload=function(){
+    gl.bindTexture(gl.TEXTURE_2D,imageTex);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true); /* flip Y so texture matches CSS orientation */
+    gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,img);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false); /* reset for FBO textures */
+    imgW=img.naturalWidth; imgH=img.naturalHeight;
+    imageLoaded=true;
+    /* Pre-render one frame at progress=0 so canvas has the image ready
+       before loader finishes — eliminates flicker on transition */
+    preRenderFrame();
+  };
+  img.src='assets/img/page/top/header/shore.jpg';
+
+  /* ---- Compute background-size:cover UV mapping ---- */
+  /* Returns [offsetX, offsetY, scaleX, scaleY] so shader samples
+     the same crop region as CSS background-size:cover center */
+  function computeCoverUV(){
+    var vpAspect = W / H;
+    var imgAspect = imgW / imgH;
+    var sx, sy, ox, oy;
+    if(vpAspect > imgAspect){
+      // viewport wider: fit width, crop top/bottom
+      sx = 1.0;
+      sy = imgAspect / vpAspect;
+      ox = 0.0;
+      oy = (1.0 - sy) * 0.5;
+    } else {
+      // viewport taller: fit height, crop left/right
+      sx = vpAspect / imgAspect;
+      sy = 1.0;
+      ox = (1.0 - sx) * 0.5;
+      oy = 0.0;
+    }
+    return [ox, oy, sx, sy];
+  }
+
+  /* ---- Resize ---- */
+  var W,H,fboA,fboB;
+  function resize(){
+    W=canvas.clientWidth*devicePixelRatio;
+    H=canvas.clientHeight*devicePixelRatio;
+    canvas.width=W; canvas.height=H;
+    gl.viewport(0,0,W,H);
+    fboA=mkFBO(W,H); fboB=mkFBO(W,H);
+  }
+  resize();
+  window.addEventListener('resize',resize);
+
+  /* ---- Pre-render one frame so canvas is ready before loader ends ---- */
+  function preRenderFrame(){
+    if(!imageLoaded) return;
+    var coverUV = computeCoverUV();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fboA.fb);
+    gl.useProgram(progGlitch);
+    bindQuad(progGlitch);
+    gl.uniform4f(gl.getUniformLocation(progGlitch, 'u_coverUV'), coverUV[0], coverUV[1], coverUV[2], coverUV[3]);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, imageTex);
+    gl.uniform1i(gl.getUniformLocation(progGlitch, 'u_image'), 0);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, fboB.tex);
+    gl.uniform1i(gl.getUniformLocation(progGlitch, 'u_feedback'), 1);
+    gl.uniform1f(gl.getUniformLocation(progGlitch, 'u_progress'), 0);
+    gl.uniform1f(gl.getUniformLocation(progGlitch, 'u_time'), 0);
+    gl.uniform2f(gl.getUniformLocation(progGlitch, 'u_resolution'), W, H);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    /* Copy to screen (canvas still hidden behind loader, but pixels are ready) */
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.useProgram(progCopy);
+    bindQuad(progCopy);
+    gl.uniform4f(gl.getUniformLocation(progCopy, 'u_coverUV'), 0, 0, 1, 1);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, fboA.tex);
+    gl.uniform1i(gl.getUniformLocation(progCopy, 'u_tex'), 0);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    /* Also copy to fboB for feedback */
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fboB.fb);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    /* Show canvas immediately — it's behind the loader (z-index 999),
+       so user won't see it yet. But when loader strips wipe away,
+       they'll reveal this canvas instead of the CSS background or fluid gradient. */
+    canvas.style.opacity = '1';
+  }
+
+  /* ---- Auto-play timing ---- */
+  var OCEAN_HOLD = 0;         /* ms — glitch starts immediately, no static hold */
+  var GLITCH_DURATION = 2500; /* ms — total glitch animation time */
+  var progress = 0;
+  var dismissed = false;
+  var phaseStartTime = null; /* set on first render after loader */
+  var startTime = performance.now();
+
+  /* Non-linear progress curve — staged resistance then collapse:
+     Stage 1 (0–20%,   0.50s): barely anything, micro-tremors → output 0–0.08
+     Stage 2 (20–50%,  0.75s): distortion creeps in          → output 0.08–0.30
+     Stage 3 (50–70%,  0.50s): losing the fight, accelerating→ output 0.30–0.65
+     Stage 4 (70–100%, 0.75s): total collapse, exponential    → output 0.65–1.0 */
+  function shapeProgress(linear){
+    if(linear < 0.20){
+      return (linear / 0.20) * 0.08;
+    } else if(linear < 0.50){
+      var t = (linear - 0.20) / 0.30;
+      return 0.08 + t * t * 0.22;
+    } else if(linear < 0.70){
+      var t = (linear - 0.50) / 0.20;
+      return 0.30 + t * 0.35;
+    } else {
+      var t = (linear - 0.70) / 0.30;
+      return 0.65 + t * t * 0.35;
+    }
+  }
+
+  /* ---- CRT shutdown (canvas-rendered) ---- */
+  /* Realistic old CRT TV power-off:
+     - Image squeezes vertically toward center
+     - Barrel distortion (rounded corners intensify)
+     - Noise particles (not pixel-level getImageData — much faster)
+     - Scanlines
+     - Phosphor brightness boost
+     - Curved bright line with glow
+     - Afterglow phosphor dot */
+  var crtCanvas = document.createElement('canvas');
+  crtCanvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999;pointer-events:none;display:none;';
+  document.body.appendChild(crtCanvas);
+  var crtCtx = crtCanvas.getContext('2d');
+
+  function playCRTShutdown(callback){
+    /* Use CSS pixels (not devicePixelRatio) for the CRT canvas to keep it fast */
+    var crtW = window.innerWidth;
+    var crtH = window.innerHeight;
+    crtCanvas.width = crtW;
+    crtCanvas.height = crtH;
+    crtCanvas.style.display = 'block';
+
+    /* Grab the current glitch WebGL canvas as source image */
+    var srcImg = null;
+    try {
+      srcImg = document.createElement('canvas');
+      srcImg.width = crtW; srcImg.height = crtH;
+      srcImg.getContext('2d').drawImage(canvas, 0, 0, crtW, crtH);
+    } catch(e){ srcImg = null; }
+
+    var CRT_DURATION = 350; /* ms */
+    var crtStart = performance.now();
+
+    function renderCRT(){
+      var elapsed = performance.now() - crtStart;
+      var t = Math.min(elapsed / CRT_DURATION, 1);
+
+      /* Black background always */
+      crtCtx.fillStyle = '#000';
+      crtCtx.fillRect(0, 0, crtW, crtH);
+
+      /* ── Squeeze parameters ── */
+      var squeezeRaw = Math.min(t / 0.3, 1);
+      var sq = squeezeRaw * squeezeRaw * squeezeRaw * squeezeRaw; /* quartic — very fast snap */
+
+      var scaleY = 1.0 - sq * 0.997;
+      var scaleX = 1.0 - sq * 0.12;
+
+      var drawW = crtW * scaleX;
+      var drawH = crtH * scaleY;
+      var drawX = (crtW - drawW) / 2;
+      var drawY = (crtH - drawH) / 2;
+
+      /* ── Draw squeezed source image ── */
+      if(drawH > 1 && srcImg){
+        crtCtx.save();
+        /* CRT barrel distortion: rounded corners increase as it squeezes */
+        var cornerR = Math.min(drawW, drawH) * 0.08 * (1 + sq * 4);
+        if(crtCtx.roundRect){
+          crtCtx.beginPath();
+          crtCtx.roundRect(drawX, drawY, drawW, drawH, cornerR);
+          crtCtx.clip();
+        }
+        crtCtx.drawImage(srcImg, drawX, drawY, drawW, drawH);
+
+        /* Phosphor brightness boost as electrons concentrate */
+        if(sq > 0.1){
+          var bright = Math.min((sq - 0.1) * 1.1, 0.85);
+          crtCtx.fillStyle = 'rgba(190,210,255,' + bright + ')';
+          crtCtx.fillRect(drawX, drawY, drawW, drawH);
+        }
+        crtCtx.restore();
+      }
+
+      /* ── Scanlines ── */
+      if(drawH > 4){
+        crtCtx.fillStyle = 'rgba(0,0,0,0.15)';
+        var scanGap = Math.max(2, Math.round(3 * (1 - sq * 0.5)));
+        for(var sy = drawY; sy < drawY + drawH; sy += scanGap){
+          crtCtx.fillRect(drawX, sy, drawW, 1);
+        }
+      }
+
+      /* ── Static noise particles (fast: draw small rects, no getImageData) ── */
+      if(sq > 0.05){
+        var noiseIntensity = Math.min(sq * 1.5, 1);
+        var noiseCount = Math.floor(crtW * 0.15 * noiseIntensity);
+        for(var ni = 0; ni < noiseCount; ni++){
+          var nx = drawX + Math.random() * drawW;
+          var ny = drawY + Math.random() * drawH;
+          var ns = 1 + Math.random() * 2;
+          var nb = 100 + Math.random() * 155;
+          crtCtx.fillStyle = 'rgba(' + (nb|0) + ',' + (nb|0) + ',' + ((nb*1.1)|0) + ',' + (0.3 + Math.random()*0.5).toFixed(2) + ')';
+          crtCtx.fillRect(nx, ny, ns, ns);
+        }
+      }
+
+      /* ── Bright center line (appears when image is very thin) ── */
+      if(drawH < crtH * 0.05){
+        var linePhase = 1 - drawH / (crtH * 0.05);
+        var cy = crtH / 2;
+
+        /* Single subtle glow behind the line — no heavy bloom */
+        crtCtx.beginPath();
+        crtCtx.moveTo(crtW * 0.03, cy);
+        crtCtx.quadraticCurveTo(crtW * 0.5, cy + 4, crtW * 0.97, cy);
+        crtCtx.lineWidth = Math.max(2, drawH) + 6 * linePhase;
+        crtCtx.strokeStyle = 'rgba(200,210,230,' + (linePhase * 0.2).toFixed(3) + ')';
+        crtCtx.lineCap = 'round';
+        crtCtx.stroke();
+
+        /* Core bright white line */
+        crtCtx.beginPath();
+        crtCtx.moveTo(crtW * 0.05, cy);
+        crtCtx.quadraticCurveTo(crtW * 0.5, cy + 2.5, crtW * 0.95, cy);
+        crtCtx.lineWidth = Math.max(1, drawH * 0.6);
+        crtCtx.strokeStyle = 'rgba(255,255,255,' + (0.8 + linePhase * 0.2).toFixed(3) + ')';
+        crtCtx.lineCap = 'round';
+        crtCtx.stroke();
+      }
+
+      /* ── Afterglow phase (last 12%): clean small white dot, no bloom ── */
+      if(t > 0.88){
+        var fadeT = (t - 0.88) / 0.12;
+        var dotAlpha = (1 - fadeT);
+        var dotR = 3 * (1 - fadeT * 0.5);
+        var cx = crtW / 2, cy = crtH / 2;
+
+        crtCtx.beginPath();
+        crtCtx.arc(cx, cy, dotR, 0, Math.PI * 2);
+        crtCtx.fillStyle = 'rgba(255,255,255,' + dotAlpha.toFixed(3) + ')';
+        crtCtx.fill();
+      }
+
+      if(t < 1){
+        requestAnimationFrame(renderCRT);
+      } else {
+        crtCanvas.style.display = 'none';
+        if(callback) callback();
+      }
+    }
+
+    requestAnimationFrame(renderCRT);
+  }
+
+  function afterCRTShutdown(){
+    /* Hide the ocean/glitch layer */
+    mv.style.display = 'none';
+    if(spacerEl) spacerEl.style.display = 'none';
+    document.body.classList.remove('ocean-active');
+    window.scrollTo(0, 0);
+
+    /* CRT done → redirect to index.html */
+    window.location.href = 'index.html';
+  }
+
+  /* ---- Recovery flicker: ocean struggles to come back ---- */
+  /* Epilepsy-safe: each flash ≥350ms, keeping transitions under 3Hz.
+     Irregular rhythm but no rapid strobing. Wider amplitude swings. */
+  function playRecoveryFlicker(callback){
+    var flashes = [
+      { at:0,    dur:450,  glitch:0.05 },  /* nearly clean — hope */
+      { at:450,  dur:350,  glitch:0.92 },  /* violent snap back */
+      { at:800,  dur:500,  glitch:0.08 },  /* fights hard, almost there */
+      { at:1300, dur:350,  glitch:0.97 },  /* crushed — worse than before */
+      { at:1650, dur:400,  glitch:0.15 },  /* weaker attempt */
+      { at:2050, dur:450,  glitch:0.03 },  /* last gasp — nearly perfect, then CRT */
+    ];
+    var totalDur = 2500;
+    var flickerStart = performance.now();
+
+    function renderFlicker(){
+      var elapsed = performance.now() - flickerStart;
+      if(elapsed >= totalDur){
+        if(callback) callback();
+        return;
+      }
+
+      /* Find which flash we're in */
+      var currentGlitch = 1.0; /* default: full corruption */
+      for(var i = 0; i < flashes.length; i++){
+        var f = flashes[i];
+        if(elapsed >= f.at && elapsed < f.at + f.dur){
+          currentGlitch = f.glitch;
+          break;
+        }
+      }
+
+      var t = (performance.now() - startTime) / 1000;
+      var coverUV2 = computeCoverUV();
+
+      /* Render with the current glitch level */
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.useProgram(progGlitch);
+      bindQuad(progGlitch);
+      gl.uniform4f(gl.getUniformLocation(progGlitch, 'u_coverUV'), coverUV2[0], coverUV2[1], coverUV2[2], coverUV2[3]);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, imageTex);
+      gl.uniform1i(gl.getUniformLocation(progGlitch, 'u_image'), 0);
+      gl.activeTexture(gl.TEXTURE1);
+      /* Use original image as feedback for low-glitch frames (cleaner recovery),
+         use last FBO for high-glitch frames (corrupted feedback) */
+      gl.bindTexture(gl.TEXTURE_2D, currentGlitch < 0.5 ? imageTex : fboB.tex);
+      gl.uniform1i(gl.getUniformLocation(progGlitch, 'u_feedback'), 1);
+      gl.uniform1f(gl.getUniformLocation(progGlitch, 'u_progress'), currentGlitch);
+      gl.uniform1f(gl.getUniformLocation(progGlitch, 'u_time'), t);
+      gl.uniform2f(gl.getUniformLocation(progGlitch, 'u_resolution'), W, H);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+      requestAnimationFrame(renderFlicker);
+    }
+    requestAnimationFrame(renderFlicker);
+  }
+
+  /* ---- Render loop ---- */
+  function render(){
+    if(!imageLoaded || !loaderDone){requestAnimationFrame(render);return;}
+
+    /* Start timer on first render after loader */
+    if(phaseStartTime === null) phaseStartTime = performance.now();
+
+    var elapsed = performance.now() - phaseStartTime;
+
+    /* Ocean hold: let the image sit untouched for OCEAN_HOLD ms */
+    if(elapsed < OCEAN_HOLD){
+      progress = 0;
+    } else {
+      var linearProgress = Math.min((elapsed - OCEAN_HOLD) / GLITCH_DURATION, 1);
+      progress = shapeProgress(linearProgress);
+    }
+
+    var t = (performance.now() - startTime) / 1000;
+
+    var coverUV = computeCoverUV();
+
+    // Pass 1: glitch → fboA
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fboA.fb);
+    gl.useProgram(progGlitch);
+    bindQuad(progGlitch);
+    gl.uniform4f(gl.getUniformLocation(progGlitch, 'u_coverUV'), coverUV[0], coverUV[1], coverUV[2], coverUV[3]);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, imageTex);
+    gl.uniform1i(gl.getUniformLocation(progGlitch, 'u_image'), 0);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, fboB.tex);
+    gl.uniform1i(gl.getUniformLocation(progGlitch, 'u_feedback'), 1);
+    gl.uniform1f(gl.getUniformLocation(progGlitch, 'u_progress'), progress);
+    gl.uniform1f(gl.getUniformLocation(progGlitch, 'u_time'), t);
+    gl.uniform2f(gl.getUniformLocation(progGlitch, 'u_resolution'), W, H);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+    // Pass 2: fboA → screen
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.useProgram(progCopy);
+    bindQuad(progCopy);
+    gl.uniform4f(gl.getUniformLocation(progCopy, 'u_coverUV'), 0, 0, 1, 1);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, fboA.tex);
+    gl.uniform1i(gl.getUniformLocation(progCopy, 'u_tex'), 0);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+    // Pass 3: fboA → fboB (feedback)
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fboB.fb);
+    gl.uniform4f(gl.getUniformLocation(progCopy, 'u_coverUV'), 0, 0, 1, 1);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+    /* ---- Glitch done → recovery flicker → CRT shutdown → redirect ---- */
+    if(progress >= 1 && !dismissed){
+      dismissed = true;
+      playRecoveryFlicker(function(){
+        playCRTShutdown(afterCRTShutdown);
+      });
+      return;
+    }
+
+    if(!dismissed) requestAnimationFrame(render);
+  }
+
+  requestAnimationFrame(render);
+})();
+</script>
+
+<!-- WebGL fluid gradient background -->
+<script src="assets/js/fluid-bg.js"></script>
+<script src="assets/js/vendor.js"></script>
+<script src="assets/js/common.js"></script>
+<!-- Force loader to always play: clear the skip flag before intro.js runs -->
+<script>sessionStorage.removeItem("firstLoaded");</script>
+<script src="assets/js/page/intro.js"></script>
+
+</body>
+</html>

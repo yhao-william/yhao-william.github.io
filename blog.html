@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Blog — Yijie Hao</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+.page{opacity:0;animation:pageIn 0.35s ease 0.05s forwards;}
+@keyframes pageIn{to{opacity:1;}}
+
+body{
+  min-height:100vh;
+  display:flex;justify-content:center;
+  background:rgba(244,243,238,0.92);
+  background-image:
+    linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px);
+  background-size:32px 32px;
+  font-family:'Inter',sans-serif;
+  color:rgba(25,18,70,0.85);
+  -webkit-font-smoothing:antialiased;
+}
+
+.page{
+  width:100%;max-width:700px;
+  padding:4vh 3rem;
+  min-height:100vh;
+  display:flex;flex-direction:column;
+}
+
+/* Header — same as homepage */
+.header{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding-bottom:2vh;border-bottom:1px solid rgba(30,20,80,0.08);
+  margin-bottom:4vh;
+}
+.header__name{
+  font-family:'Cormorant Garamond',serif;font-size:1.75rem;
+  font-weight:600;color:rgba(25,18,70,0.88);text-decoration:none;
+}
+.header__name:hover{color:rgba(25,18,70,1);}
+.header__nav{display:flex;gap:1.5rem;}
+.header__nav a{
+  font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:rgba(30,22,80,0.5);
+  text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;transition:color 0.3s;
+}
+.header__nav a:hover{color:rgba(25,18,70,0.8);}
+.header__nav a.active{color:rgba(25,18,70,0.88);}
+
+/* Page title */
+.page-title{
+  font-family:'IBM Plex Mono',monospace;font-size:0.68rem;
+  color:rgba(30,22,80,1);letter-spacing:0.12em;text-transform:uppercase;
+  display:flex;align-items:center;gap:0.6rem;margin-bottom:3vh;
+}
+.page-title .tag{
+  font-size:0.65rem;padding:2px 8px;border-radius:3px;
+  color:#3a2d8c;background:rgba(50,40,130,0.1);
+}
+.page-title::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,rgba(30,22,80,0.1),transparent);
+}
+
+/* Blog entries */
+.blog-list{flex:1;}
+
+.blog-entry{
+  margin-bottom:3.5vh;
+  padding-bottom:3vh;
+  border-bottom:1px solid rgba(30,20,80,0.05);
+}
+.blog-entry:last-child{border-bottom:none;}
+
+.blog-entry__date{
+  font-family:'IBM Plex Mono',monospace;font-size:0.68rem;
+  color:rgba(50,40,130,0.6);margin-bottom:0.4vh;
+}
+.blog-entry__title{
+  font-family:'Cormorant Garamond',serif;font-size:1.35rem;
+  font-weight:600;color:rgba(25,18,70,0.88);line-height:1.35;
+  margin-bottom:0.6vh;
+}
+.blog-entry__title a{
+  color:inherit;text-decoration:none;transition:color 0.3s;
+}
+.blog-entry__title a:hover{color:#615eed;}
+.blog-entry__summary{
+  font-size:0.95rem;color:rgba(25,18,70,0.65);line-height:1.7;
+}
+
+/* Footer */
+.footer{
+  display:flex;justify-content:center;gap:1.5rem;
+  padding-top:2vh;border-top:1px solid rgba(30,22,80,0.08);
+  margin-top:auto;
+}
+.footer a{
+  font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:rgba(30,22,80,0.4);
+  text-decoration:none;letter-spacing:0.04em;transition:color 0.3s;
+}
+.footer a:hover{color:rgba(25,18,70,0.75);}
+
+/* Page transition overlay */
+#page-transition{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(244,243,238,0.92);
+  background-image:
+    linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px);
+  background-size:32px 32px;
+  opacity:0;pointer-events:none;
+  z-index:9999;
+  transition:opacity 0.3s ease;
+}
+#page-transition.active{opacity:1;pointer-events:all;}
+
+@media(max-width:640px){
+  .page{padding:3vh 1.5rem;}
+  .header__name{font-size:1.4rem;}
+  .blog-entry__title{font-size:1.2rem;}
+}
+</style>
+</head>
+<body>
+<div id="page-transition"></div>
+<div class="page">
+  <div class="header">
+    <a class="header__name" href="index.html">Yijie Hao</a>
+    <nav class="header__nav">
+      <a href="blog.html" class="active">Blog</a>
+      <a href="papers.html">Papers</a>
+      <a href="#">CV</a>
+    </nav>
+  </div>
+
+  <div class="page-title"><span class="tag">&lt;think&gt;</span> Blog</div>
+
+  <div class="blog-list">
+    <div class="blog-entry">
+      <div class="blog-entry__date">2026.03</div>
+      <div class="blog-entry__title"><a href="blog/alignment-as-selective-generalization-stability.html">Alignment as selective generalization stability</a></div>
+      <div class="blog-entry__summary">A reframing of the alignment problem: what if alignment failures are instances of a single, deeper phenomenon — unstable generalization of proxy objectives under distribution shift?</div>
+    </div>
+
+    <div class="blog-entry">
+      <div class="blog-entry__date">2026.03</div>
+      <div class="blog-entry__title"><a href="blog/representation-collapse.html">On the geometry of representation collapse in RLHF</a></div>
+      <div class="blog-entry__summary">Why reward models trained with RLHF tend to collapse internal representations into low-dimensional manifolds, and what this means for downstream alignment.</div>
+    </div>
+
+    <div class="blog-entry">
+      <div class="blog-entry__date">2026.02</div>
+      <div class="blog-entry__title"><a href="blog/alignment-problem-deep-learning.html">The alignment problem in 2026: what the evidence says</a></div>
+      <div class="blog-entry__summary">In 2023, Ngo et al. laid out a theoretical case for how deep learning could produce misaligned AI. Three years later, the evidence is in — and it's more nuanced than anyone expected.</div>
+    </div>
+
+    <div class="blog-entry">
+      <div class="blog-entry__date">2026.02</div>
+      <div class="blog-entry__title"><a href="blog/alignment-problem-deep-learning-notes.html">Reading notes: the alignment problem from a deep learning perspective</a></div>
+      <div class="blog-entry__summary">Reading notes on Ngo, Chan, and Mindermann's ICLR 2024 position paper. Traces a causal chain from RLHF to situationally-aware reward hacking, misaligned goals, and power-seeking behavior.</div>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin:3vh 0 1vh;"><a href="demo.html" style="font-family:'IBM Plex Mono',monospace;font-size:0.62rem;color:rgba(30,22,80,0.3);text-decoration:none;letter-spacing:0.06em;transition:color 0.3s;" onmouseover="this.style.color='rgba(30,22,80,0.6)'" onmouseout="this.style.color='rgba(30,22,80,0.3)'">ocean / glitch / crt — a webgl experiment</a></div>
+
+  <div class="footer">
+    <a href="mailto:you@example.com">email</a>
+    <a href="#">github</a>
+    <a href="#">scholar</a>
+    <a href="#">linkedin</a>
+  </div>
+</div>
+<script>
+(function(){
+  var overlay = document.getElementById('page-transition');
+  document.addEventListener('click', function(e){
+    var link = e.target.closest('a');
+    if(!link) return;
+    var href = link.getAttribute('href');
+    if(!href || href === '#' || href.startsWith('mailto:') || href.startsWith('http')) return;
+    e.preventDefault();
+    if(overlay) overlay.classList.add('active');
+    setTimeout(function(){ window.location.href = href; }, 320);
+  });
+})();
+</script>
+</body>
+</html>

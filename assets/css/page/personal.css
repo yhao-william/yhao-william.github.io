@@ -1,0 +1,695 @@
+
+.js-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:1;opacity:0.55;}
+
+/*
+  Real-time fluid gradient background (WebGL).
+  - .fluid-bg sits behind the existing PIXI canvas (.js-canvas)
+  - main is lifted above both canvases
+  - html provides a static gradient fallback
+*/
+.fluid-bg{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;}
+html{background:linear-gradient(180deg,#9abbf1 0%,#c7caf4 55%,#e2ebf9 100%);}
+body{background:transparent !important;}
+/*
+  注意：.l-header 在原模板中用于全屏抽屉导航（position: fixed）。
+  如果把 .l-header 改成 position: relative，会让它参与文档流并占据整屏高度，
+  从而在首屏主视觉（shore.jpg）上方制造一大块“空白区域”。
+  这里仅提升 main 的层级，避免 canvas 覆盖内容；不要改动 .l-header 的定位。
+*/
+main{position:relative;z-index:2;}
+/* 关键修复：原站 reset 中 html/a 默认是 transparent，会导致文字不可见。
+   个人主页需显式设置前景色与链接色。 */
+/* 可见性与主题：浅色底 + Misty Blue（主色 #615eed） */
+:root{
+  --bg:#ffffff;
+  --fg:#0b1020;
+  --muted:rgba(11,16,32,0.72);
+  --line:rgba(11,16,32,0.14);
+  --accent:#615eed;           /* 主强调色 */
+  --accent-2:#7f8cff;         /* Misty Blue 变体 */
+  --accent-3:#b3b8ff;         /* 更浅 */
+  --accent-soft:rgba(97,94,237,0.12);
+  --accent-soft2:rgba(127,140,255,0.12);
+  --card-bg:rgba(97,94,237,0.06);
+  --font-display: "Cormorant Garamond", "Noto Serif SC", Georgia, serif;
+  --font-body: "Cormorant Garamond", "Noto Serif SC", Georgia, serif;
+}
+
+/* Global font override: elegant humanist serif with calligraphic warmth */
+html, body {
+  font-family: var(--font-body) !important;
+}
+/* Override the .c-sans class that was used for Noto Sans JP */
+.c-sans {
+  font-family: var(--font-display) !important;
+}
+/* Kill the scroll-reveal animation system entirely.
+   Original template uses color:transparent + JS-triggered animation classes.
+   We show text directly — no slide-in effects. */
+.c-ttlwrap {
+  color: inherit !important;
+}
+.c-ttlwrap span {
+  animation: none !important;
+  -webkit-animation: none !important;
+}
+
+/* ── Loader: blue blocks on white loader bg ── */
+/* Blocks are blue (solid blue screen). When they slide away, white loader bg is revealed. */
+.loader__blks .blk,
+.loader__blks .blk2 {
+  background: #615eed !important;
+}
+/* Loader container: white bg so blocks wipe reveals white */
+.loader {
+  background: #fff !important;
+}
+/* Logo text: starts blue (invisible on blue bg), revealed by logoin animation.
+   No !important — the animation needs to override this. */
+.loader__logo span {
+  color: #615eed;
+}
+/* Logo curtain (the wipe bar): white on blue */
+.loader__logo:before {
+  background: #fff !important;
+}
+/* Logo text animation: blue → white (curtain reveals it) */
+@keyframes logoin {
+  0% { color: #615eed; }
+  100% { color: #fff; }
+}
+@-webkit-keyframes logoin {
+  0% { color: #615eed; }
+  100% { color: #fff; }
+}
+/* Loading text: white */
+.loader .ttl {
+  color: #fff !important;
+}
+/* Loader logo: centered */
+.loader__logo {
+  display: flex !important;
+  justify-content: center;
+  width: 100%;
+  left: 0 !important;
+  top: 50% !important;
+  transform: translateY(-50%);
+}
+html, body{
+  color:var(--fg);
+  /* Keep transparent so the fluid canvas (or html fallback gradient) shows through */
+  background:transparent;
+}
+body.top{ background:#615eed !important; }
+a{ color:inherit; }
+a:hover{ color:var(--accent); }
+
+/*
+  基于原站 common.css 的排版体系做轻量扩展。
+  目标：保留“暗色 + 粒子 + 分块网格”的气质，同时把内容变成个人主页。
+*/
+
+:root {
+  --personal-maxw: 1100px;
+}
+
+.p-wrap {
+  width: min(var(--personal-maxw), 92vw);
+  margin: 0 auto;
+}
+
+/* 顶部 Hero */
+.p-hero {
+  min-height: calc(var(--screenHeight, 100vh) * 0.85);
+  display: flex;
+  align-items: center;
+  padding: 120px 0 80px;
+}
+
+.p-hero__name {
+  font-size: clamp(36px, 4.6vw, 72px);
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+}
+
+.p-hero__tagline {
+  margin-top: 16px;
+  font-size: clamp(16px, 1.5vw, 20px);
+  opacity: 0.9;
+  max-width: 70ch;
+}
+
+.p-hero__meta {
+  margin-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  opacity: 0.85;
+}
+
+.p-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+}
+
+/* 内容区块 */
+.p-section {
+  padding: 96px 0;
+}
+
+.p-section__hd {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.p-section__ttl {
+  font-size: 30px;
+  letter-spacing: 0.10em;
+}
+
+.p-section__sub {
+  font-size: 14px;
+  opacity: 0.75;
+  color: var(--muted);
+}
+
+.p-cards {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 14px;
+}
+
+.p-card {
+  grid-column: span 12;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 18px;
+  padding: 18px;
+  background: var(--card-bg); border: 1px solid var(--line);
+  backdrop-filter: blur(10px);
+}
+
+.p-card__ttl {
+  font-size: 19px;
+  margin-bottom: 10px;
+}
+
+.p-card__txt {
+  opacity: 0.95;
+  line-height: 1.75;
+  font-size: 15.5px;
+  color: var(--fg);
+}
+
+.p-card__meta {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  opacity: 0.8;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+@media (min-width: 768px) {
+  .p-card.-half { grid-column: span 6; }
+  .p-card.-third { grid-column: span 4; }
+}
+
+/* 页脚 */
+.p-footer {
+  padding: 50px 0 70px;
+  opacity: 0.8;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.p-footer a {
+  text-decoration: underline;
+}
+
+
+/* 修复：在原站的 c-grid 体系里，内容必须落在可见的 grid-column。我们把页面内容包进 c-innerfullgrid 后，确保各块占满该子网格。 */
+.c-innerfullgrid > * { grid-column: 1 / -1; }
+
+
+
+/* 标题“幕布”颜色扩展：沿用原站 c-ttlwrap 的 curtain reveal 动画，只换幕布颜色 */
+.c-ttlwrap.-g::after { background: #c8a24a; } /* gold */
+.c-ttlwrap.-b::after { background: #2f81f7; } /* blue */
+.c-ttlwrap.-p::after { background: #a855f7; } /* purple */
+
+/* 各栏目轻量底色：不改变整体黑底，只给区块一点区分 */
+.p-section--news { background: rgba(47, 129, 247, 0.06); }
+.p-section--publication { background: rgba(168, 85, 247, 0.06); }
+.p-section--blogs { background: rgba(220, 0, 0, 0.05); }
+
+/* 标题容器在网格里占满，避免被子网格挤压 */
+.p-section__ttl { grid-column: 1 / -1; }
+
+
+/* 顶部宣言 / 大标题（位于 introduction 之前） */
+.p-manifesto{
+  padding: 14vh 0 10vh;
+  position: relative;
+}
+.p-manifesto::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: transparent;
+  pointer-events:none;
+}
+.p-manifesto__inner{
+  width:100%;
+}
+.p-manifesto__badge{
+  display:inline-block;
+  font-size: 12px;
+  letter-spacing: 0.24em;
+  opacity: 0.8;
+  margin-bottom: 18px;
+}
+.p-manifesto__title{
+  font-size: clamp(42px, 6vw, 104px);
+  line-height: 1.05;
+  letter-spacing: 0.06em;
+  margin: 0 0 18px 0;
+  font-weight: 300;
+  font-family: var(--font-display) !important;
+}
+.p-manifesto__sub{
+  font-size: clamp(14px, 1.4vw, 20px);
+  line-height: 1.7;
+  max-width: 62ch;
+  margin: 0 0 26px 0;
+  opacity: 0.9;
+}
+.p-manifesto__cta{
+  display:flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+
+/* ===== Publication (music-style blocks) ===== */
+.p-pubs{
+  margin-top: 28px;
+}
+
+.pubitem{
+  color: var(--accent);
+  margin-top: 42px;
+}
+@media (min-width:1024px){
+  .pubitem{ margin-top: 96px; }
+}
+
+/* container similar to .music__inner */
+.pubitem__inner{
+  display:grid;
+  grid-column: 2/13;
+  padding: 54px 0 5rem;
+  position:relative;
+  background: rgba(97,94,237,0.05); /* fallback */
+}
+@media (min-width:1024px){
+  .pubitem__inner{
+    grid-column: 7/19;
+    padding: 72px 5% 7rem 0;
+  }
+}
+
+/* accent per item */
+.pubitem--a .pubitem__inner{ background: rgba(97,94,237,0.07); }
+.pubitem--b .pubitem__inner{ background: rgba(127,140,255,0.08); }
+.pubitem--c .pubitem__inner{ background: rgba(97,94,237,0.09); }
+
+/* top/bottom bars like original */
+.pubitem__inner::after,
+.pubitem__inner::before{
+  background:var(--accent);
+  content:"";
+  transform: scaleX(0);
+  transform-origin:left;
+}
+.pubitem__inner.-reveal::after,
+.pubitem__inner.-reveal::before{
+  transform: scaleX(1);
+}
+.pubitem__inner::before{
+  transition: transform .5s;
+  position:absolute;
+  top:4px;
+  right:-1%;
+  height:8px;
+  width: 22%;
+}
+@media (max-width:1023px){
+  .pubitem__inner::before{
+    top:5px;
+    height:6px;
+    width: 35%;
+  }
+}
+.pubitem__inner::after{
+  transition: transform .5s .5s;
+  position:absolute;
+  left:-15%;
+  bottom:-18px;
+  height:35px;
+  width:60%;
+}
+@media (max-width:1023px){
+  .pubitem__inner::after{
+    bottom:-24px;
+  }
+}
+
+/* title label */
+.pubitem__ttl{
+  background:var(--accent);
+  color:#fff;
+  min-width: 44.2vw;
+  padding: 0 .5em;
+  position:absolute;
+  top:-30px;
+  left:-26px;
+}
+@media (min-width:1024px){
+  .pubitem__ttl{
+    top:-28px;
+    left:-34px;
+    min-width: 203px;
+  }
+}
+
+/* layout: cover + info */
+.pubitem__contents{
+  display:flex;
+  flex-direction:column;
+}
+@media (min-width:1024px){
+  .pubitem__contents{ flex-direction:row; }
+}
+
+.pubitem__ph{
+  margin-left:-8.3vw;
+  width:85.9vw;
+}
+@media (min-width:1024px){
+  .pubitem__ph{
+    margin-left:-10%;
+    width:50%;
+  }
+}
+.pubitem__ph img{ width:100%; display:block; }
+
+@media (max-width:1023px){
+  .pubitem__info{
+    margin-top: 25px;
+    padding: 0 10%;
+  }
+}
+@media (min-width:1024px){
+  .pubitem__info{
+    margin-left: 5%;
+    width: 55%;
+  }
+}
+
+.pubitem__info .ttl{
+  font-size: 1.25rem;
+  color:var(--fg);
+  font-weight:900;
+}
+@media (min-width:1024px){
+  .pubitem__info .ttl{ font-size: 1.75rem; }
+}
+.pubitem__info .txt{
+  margin-top: 10px;
+  color: var(--fg);
+  line-height: 1.9;
+}
+
+/* links */
+.pubitem__link{
+  display:flex;
+  gap: 14px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+.pubitem__link a{
+  color:var(--accent);
+  text-decoration:none;
+  border-bottom: 1px solid rgba(97,94,237,0.55);
+  padding-bottom: 2px;
+}
+.pubitem__link a:hover{
+  border-bottom-color: rgba(97,94,237,0.95);
+}
+
+/* abstract box */
+.pubitem__profile{
+  margin-top: 26px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.pubitem__profile__ttl{
+  color:var(--fg);
+  font-weight:900;
+  letter-spacing: .08em;
+  font-size: .85rem;
+}
+.pubitem__profile__txt{
+  margin-top: 10px;
+  color: var(--fg);
+  line-height: 2.0;
+  font-size: .95rem;
+}
+
+/* curtain reveal child text */
+.top__curtain__child{ opacity:0; }
+.top__curtain.-reveal .top__curtain__child{
+  opacity:1;
+  transition: opacity .3s .4s ease;
+}
+
+
+/* 让导航与控件在浅色底上可读 */
+.l-header, .l-header__trigger, .l-header__close{ color: var(--fg); }
+.l-header__trigger .line{ background: var(--fg); }
+.l-gnav__item a{ color: var(--fg); }
+.l-gnav__item.-active a{ color: var(--accent); }
+
+
+/* 按钮（沿用原类名，改为浅色主题） */
+.c-btn{
+  border-color: var(--line);
+}
+.c-btn.-g{
+  background: var(--accent);
+  color: #fff;
+  border-color: transparent;
+}
+.c-btn.-line{
+  background: transparent;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.c-btn.-line:hover{
+  background: var(--accent-soft);
+}
+
+
+/* 标题 curtain 的配色（基于原站 .c-ttlwrap 机制） */
+.c-ttlwrap::after{ background: var(--accent); }
+.c-ttlwrap.-g::after{ background: var(--accent); }
+.c-ttlwrap.-b::after{ background: var(--accent-2); }
+.c-ttlwrap.-p::after{ background: var(--accent-3); }
+.c-ttlwrap.-cr::after{ background: var(--accent); }
+
+
+/* 侧边导航面板（原站默认黑底，这里改为白底） */
+.l-header__inner{
+  background: #fff !important;
+  border-left: 1px solid var(--line);
+}
+.l-header__close{
+  background: transparent;
+}
+
+/* ===== News (sample-like list + hover + per-character motion) ===== */
+.p-section--news .news__list{
+  display:grid;
+  grid-column: 1/-1;
+  grid-template-columns: repeat(10, minmax(0,1fr));
+  position:relative;
+  margin-top: 6px;
+}
+@media (min-width:1024px){
+  .p-section--news .news__list{
+    grid-column: 2/-1;
+    grid-template-columns: repeat(19, minmax(0,1fr));
+  }
+}
+.p-section--news .news__list:before{
+  position:absolute;
+  left:0;
+  bottom:0;
+  background: var(--line);
+  content:"";
+  height:1px;
+  transform:scaleX(0);
+  transform-origin:0 0;
+  width:100%;
+}
+.p-section--news .news__list.-reveal:before{
+  animation: lineanim 0.8s 0.7s cubic-bezier(0.785, 0.135, 0.15, 0.86) forwards;
+}
+@media (min-width:1024px){
+  .p-section--news .news__list.-reveal:before{ animation-delay:0.3s; }
+}
+
+100%{transform:scaleX(1);} }
+100%{opacity:1; transform:translate(0,0);} }
+
+.p-section--news .news__list__item{
+  display:grid;
+  grid-column:1/-1;
+  grid-template-columns: inherit;
+  opacity:0;
+  position:relative;
+}
+.p-section--news .news__list__item:before{
+  position:absolute;
+  top:0; left:0;
+  background: var(--line);
+  content:"";
+  height:1px;
+  transform:scaleX(0);
+  transform-origin:0 0;
+  width:100%;
+}
+.-reveal .news__list__item::before{
+  animation: lineanim 0.8s 0s cubic-bezier(0.785, 0.135, 0.15, 0.86) forwards;
+}
+.-reveal .news__list__item{ animation: elmin 0.4s 0s ease forwards; }
+
+.-reveal .news__list__item:nth-child(1){ animation-delay:0.2s; }
+.-reveal .news__list__item:nth-child(1):before{ animation-delay:0.1s; }
+.-reveal .news__list__item:nth-child(2){ animation-delay:0.4s; }
+.-reveal .news__list__item:nth-child(2):before{ animation-delay:0.2s; }
+.-reveal .news__list__item:nth-child(3){ animation-delay:0.6s; }
+.-reveal .news__list__item:nth-child(3):before{ animation-delay:0.3s; }
+.-reveal .news__list__item:nth-child(4){ animation-delay:0.8s; }
+.-reveal .news__list__item:nth-child(4):before{ animation-delay:0.4s; }
+.-reveal .news__list__item:nth-child(5){ animation-delay:1.0s; }
+.-reveal .news__list__item:nth-child(5):before{ animation-delay:0.5s; }
+
+.p-section--news .news__list__item a{
+  grid-column:1/-1;
+  padding: 1.6rem 0;
+  position:relative;
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+@media (min-width:1024px){
+  .p-section--news .news__list__item a{
+    display:grid;
+    grid-template-columns: inherit;
+    padding: 2.4rem 0;
+  }
+}
+.p-section--news .news__list__item a:after{
+  background: url(../../img/page/top/news/ico_arw.svg) no-repeat 0 0/100%;
+  content:"";
+  height:12px;
+  width:12px;
+  position:absolute;
+  top:50%;
+  right:0;
+  transform: translate(0,-50%);
+  transition: transform 0.22s ease;
+  filter: none;
+}
+@media (min-width:1024px){
+  .p-section--news .news__list__item a:after{ height:16px; width:16px; }
+}
+
+/* Hover: subtle misty background + date highlight + title char motion */
+.p-section--news .news__list__item a:hover{
+  background: rgba(97,94,237,0.06);
+}
+.p-section--news .news__list__item a:hover:after{
+  transform: translate(4px, -50%);
+}
+@media (min-width:1024px){
+  .p-section--news .news__list__item a:hover .date{ color: var(--accent); }
+  .p-section--news .news__list__item a:hover .date span:before{
+    transform: scaleX(1);
+    transform-origin: 0 0;
+  }
+}
+
+.p-section--news .news__list__item .date{
+  font-weight:700;
+  position:relative;
+  z-index:0;
+  font-size:1rem;
+  color: var(--fg);
+}
+@media (min-width:1024px){
+  .p-section--news .news__list__item .date{
+    grid-column:1/4;
+  }
+}
+.p-section--news .news__list__item .date span{ position:relative; }
+.p-section--news .news__list__item .date span:before{
+  position:absolute;
+  top:0; left:0;
+  background: rgba(97,94,237,0.18);
+  content:"";
+  height:100%;
+  width:100%;
+  transform: scaleX(0);
+  transform-origin: 100% 0;
+  transition: transform 0.3s ease;
+  z-index:-1;
+}
+
+.p-section--news .news__list__item .ttl{
+  font-weight:500;
+  padding-right: 8.3vw;
+  position:relative;
+  z-index:0;
+  font-size: 1.05rem;
+  color: var(--fg);
+  line-height: 1.55;
+}
+@media (min-width:1024px){
+  .p-section--news .news__list__item .ttl{
+    grid-column:4/19;
+    padding-right:0;
+    font-size: 1.18rem;
+  }
+}
+
+/* Per-character hover motion (closer to the sample feel) */
+.p-section--news .news__list__item .ttl .char{
+  display:inline-block;
+  transform: translate3d(0,0,0);
+  transition: transform 0.38s cubic-bezier(0.215, 0.61, 0.355, 1);
+  transition-delay: calc(var(--i) * 12ms);
+  will-change: transform;
+}
+.p-section--news .news__list__item a:hover .ttl .char{
+  transform: translate3d(0,-0.22em,0);
+}

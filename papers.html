@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Papers — Yijie Hao</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+.page{opacity:0;animation:pageIn 0.35s ease 0.05s forwards;}
+@keyframes pageIn{to{opacity:1;}}
+
+body{
+  min-height:100vh;
+  display:flex;justify-content:center;
+  background:rgba(244,243,238,0.92);
+  background-image:
+    linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px);
+  background-size:32px 32px;
+  font-family:'Inter',sans-serif;
+  color:rgba(25,18,70,0.85);
+  -webkit-font-smoothing:antialiased;
+}
+
+.page{
+  width:100%;max-width:700px;
+  padding:4vh 3rem;
+  min-height:100vh;
+  display:flex;flex-direction:column;
+}
+
+/* Header */
+.header{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding-bottom:2vh;border-bottom:1px solid rgba(30,20,80,0.08);
+  margin-bottom:4vh;
+}
+.header__name{
+  font-family:'Cormorant Garamond',serif;font-size:1.75rem;
+  font-weight:600;color:rgba(25,18,70,0.88);text-decoration:none;
+}
+.header__name:hover{color:rgba(25,18,70,1);}
+.header__nav{display:flex;gap:1.5rem;}
+.header__nav a{
+  font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:rgba(30,22,80,0.5);
+  text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;transition:color 0.3s;
+}
+.header__nav a:hover{color:rgba(25,18,70,0.8);}
+.header__nav a.active{color:rgba(25,18,70,0.88);}
+
+/* Page title */
+.page-title{
+  font-family:'IBM Plex Mono',monospace;font-size:0.68rem;
+  color:rgba(30,22,80,1);letter-spacing:0.12em;text-transform:uppercase;
+  display:flex;align-items:center;gap:0.6rem;margin-bottom:3vh;
+}
+.page-title .tag{
+  font-size:0.65rem;padding:2px 8px;border-radius:3px;
+  color:rgba(130,70,20,0.82);background:rgba(140,80,30,0.14);
+}
+.page-title::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,rgba(30,22,80,0.1),transparent);
+}
+
+/* Year group */
+.year-group{margin-bottom:3vh;}
+.year-label{
+  font-family:'IBM Plex Mono',monospace;font-size:0.72rem;
+  color:rgba(50,40,130,0.55);letter-spacing:0.06em;
+  margin-bottom:1.5vh;
+}
+
+/* Paper entries */
+.paper{
+  margin-bottom:2.5vh;
+  padding-bottom:2vh;
+  border-bottom:1px solid rgba(30,20,80,0.05);
+}
+.paper:last-child{border-bottom:none;}
+
+.paper__title{
+  font-family:'Cormorant Garamond',serif;font-size:1.2rem;
+  font-weight:600;color:rgba(25,18,70,0.88);line-height:1.35;
+  margin-bottom:0.3vh;
+}
+.paper__meta{
+  font-size:0.78rem;color:rgba(30,22,80,0.55);line-height:1.5;
+  display:flex;align-items:baseline;gap:0.8rem;flex-wrap:wrap;
+  margin-bottom:0.5vh;
+}
+.paper__meta strong{color:rgba(25,18,70,0.72);font-weight:500;}
+.paper__links a{
+  font-family:'IBM Plex Mono',monospace;font-size:0.65rem;color:rgba(30,22,80,0.45);
+  text-decoration:none;letter-spacing:0.06em;text-transform:uppercase;
+  transition:color 0.3s;margin-right:0.8rem;
+}
+.paper__links a:hover{color:rgba(25,18,70,0.75);}
+.paper__desc{
+  font-size:0.9rem;color:rgba(25,18,70,0.6);line-height:1.7;
+  margin-top:0.5vh;
+}
+
+/* BibTeX toggle */
+.paper__bibtex-toggle{
+  font-family:'IBM Plex Mono',monospace;font-size:0.6rem;
+  color:rgba(30,22,80,0.35);text-decoration:none;letter-spacing:0.06em;
+  text-transform:uppercase;cursor:pointer;transition:color 0.3s;
+  background:none;border:none;padding:0;
+}
+.paper__bibtex-toggle:hover{color:rgba(25,18,70,0.6);}
+.paper__bibtex{
+  display:none;margin-top:0.8vh;padding:0.8rem 1rem;
+  background:rgba(30,22,80,0.04);border-radius:4px;
+  font-family:'IBM Plex Mono',monospace;font-size:0.6rem;
+  color:rgba(30,22,80,0.6);line-height:1.6;white-space:pre-wrap;
+  word-break:break-all;
+}
+.paper__bibtex.open{display:block;}
+
+/* Footer */
+.footer{
+  display:flex;justify-content:center;gap:1.5rem;
+  padding-top:2vh;border-top:1px solid rgba(30,22,80,0.08);
+  margin-top:auto;
+}
+.footer a{
+  font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:rgba(30,22,80,0.4);
+  text-decoration:none;letter-spacing:0.04em;transition:color 0.3s;
+}
+.footer a:hover{color:rgba(25,18,70,0.75);}
+
+/* Page transition overlay */
+#page-transition{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(244,243,238,0.92);
+  background-image:
+    linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px);
+  background-size:32px 32px;
+  opacity:0;pointer-events:none;
+  z-index:9999;
+  transition:opacity 0.3s ease;
+}
+#page-transition.active{opacity:1;pointer-events:all;}
+
+@media(max-width:640px){
+  .page{padding:3vh 1.5rem;}
+  .header__name{font-size:1.4rem;}
+  .paper__title{font-size:1.05rem;}
+}
+</style>
+</head>
+<body>
+<div id="page-transition"></div>
+<div class="page">
+  <div class="header">
+    <a class="header__name" href="index.html">Yijie Hao</a>
+    <nav class="header__nav">
+      <a href="blog.html">Blog</a>
+      <a href="papers.html" class="active">Papers</a>
+      <a href="#">CV</a>
+    </nav>
+  </div>
+
+  <div class="page-title"><span class="tag">output</span> Publications</div>
+
+  <div class="papers-list">
+    <div class="year-group">
+      <div class="year-label">2025</div>
+
+      <div class="paper">
+        <div class="paper__title">Scaling Oversight: Automated Red-Teaming with Adaptive Curriculum</div>
+        <div class="paper__meta"><strong>Yijie Hao</strong>, et al. — NeurIPS 2025</div>
+        <div class="paper__links">
+          <a href="#">pdf</a> <a href="#">code</a>
+          <button class="paper__bibtex-toggle" onclick="this.parentElement.nextElementSibling.classList.toggle('open')">bibtex</button>
+        </div>
+        <div class="paper__bibtex">@inproceedings{hao2025scaling,
+  title={Scaling Oversight: Automated Red-Teaming with Adaptive Curriculum},
+  author={Hao, Yijie and others},
+  booktitle={NeurIPS},
+  year={2025}
+}</div>
+        <div class="paper__desc">An adaptive curriculum framework for automated red-teaming that scales oversight by progressively generating harder adversarial prompts as the target model improves.</div>
+      </div>
+
+      <div class="paper">
+        <div class="paper__title">Mechanistic Interpretability of Refusal Behavior in Large Language Models</div>
+        <div class="paper__meta"><strong>Yijie Hao</strong>, C. Coauthor — ICML 2025</div>
+        <div class="paper__links">
+          <a href="#">pdf</a>
+          <button class="paper__bibtex-toggle" onclick="this.parentElement.nextElementSibling.classList.toggle('open')">bibtex</button>
+        </div>
+        <div class="paper__bibtex">@inproceedings{hao2025mechanistic,
+  title={Mechanistic Interpretability of Refusal Behavior in Large Language Models},
+  author={Hao, Yijie and Coauthor, C.},
+  booktitle={ICML},
+  year={2025}
+}</div>
+        <div class="paper__desc">Identifies the internal circuits responsible for refusal behavior in LLMs, showing that safety training creates sparse but fragile feature directions that can be mechanistically understood.</div>
+      </div>
+    </div>
+
+    <div class="year-group">
+      <div class="year-label">2024</div>
+
+      <div class="paper">
+        <div class="paper__title">Reward Hacking Under Distribution Shift: A Formal Framework</div>
+        <div class="paper__meta">D. Coauthor, <strong>Yijie Hao</strong>, et al. — ICLR 2024</div>
+        <div class="paper__links">
+          <a href="#">pdf</a> <a href="#">talk</a>
+          <button class="paper__bibtex-toggle" onclick="this.parentElement.nextElementSibling.classList.toggle('open')">bibtex</button>
+        </div>
+        <div class="paper__bibtex">@inproceedings{coauthor2024reward,
+  title={Reward Hacking Under Distribution Shift: A Formal Framework},
+  author={Coauthor, D. and Hao, Yijie and others},
+  booktitle={ICLR},
+  year={2024}
+}</div>
+        <div class="paper__desc">Formalizes the conditions under which reward hacking emerges during distribution shift, providing theoretical bounds on when learned reward models become unreliable proxies.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <a href="mailto:you@example.com">email</a>
+    <a href="#">github</a>
+    <a href="#">scholar</a>
+    <a href="#">linkedin</a>
+  </div>
+</div>
+<script>
+(function(){
+  var overlay = document.getElementById('page-transition');
+  document.addEventListener('click', function(e){
+    var link = e.target.closest('a');
+    if(!link) return;
+    var href = link.getAttribute('href');
+    if(!href || href === '#' || href.startsWith('mailto:') || href.startsWith('http')) return;
+    e.preventDefault();
+    if(overlay) overlay.classList.add('active');
+    setTimeout(function(){ window.location.href = href; }, 320);
+  });
+})();
+</script>
+</body>
+</html>

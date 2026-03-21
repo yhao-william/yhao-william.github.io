@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Alignment as Selective Generalization Stability — Yijie Hao</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+.page{opacity:0;animation:pageIn 0.35s ease 0.05s forwards;}
+@keyframes pageIn{to{opacity:1;}}
+
+body{
+  min-height:100vh;
+  display:flex;justify-content:center;
+  background:rgba(244,243,238,0.92);
+  background-image:
+    linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px);
+  background-size:32px 32px;
+  font-family:'Inter',sans-serif;
+  color:rgba(25,18,70,0.85);
+  -webkit-font-smoothing:antialiased;
+}
+
+.page{
+  width:100%;max-width:920px;
+  padding:4vh 3rem;
+  min-height:100vh;
+  display:flex;flex-direction:column;
+}
+
+.header{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding-bottom:2vh;border-bottom:1px solid rgba(30,20,80,0.08);
+  margin-bottom:4vh;
+}
+.header__name{
+  font-family:'Cormorant Garamond',serif;font-size:1.75rem;
+  font-weight:600;color:rgba(25,18,70,0.88);text-decoration:none;
+}
+.header__name:hover{color:rgba(25,18,70,1);}
+.header__nav{display:flex;gap:1.5rem;}
+.header__nav a{
+  font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:rgba(30,22,80,0.5);
+  text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;transition:color 0.3s;
+}
+.header__nav a:hover{color:rgba(25,18,70,0.8);}
+.header__nav a.active{color:rgba(25,18,70,0.88);}
+
+.article-layout{
+  display:grid;
+  grid-template-columns:1fr 200px;
+  gap:2rem;
+  flex:1;
+}
+
+.article-date{
+  font-family:'IBM Plex Mono',monospace;font-size:0.68rem;
+  color:rgba(50,40,130,0.6);margin-bottom:0.8vh;
+}
+.article-tag{
+  display:inline-block;
+  font-family:'IBM Plex Mono',monospace;font-size:0.6rem;
+  padding:2px 8px;border-radius:3px;
+  color:#3a2d8c;background:rgba(50,40,130,0.1);
+  letter-spacing:0.06em;margin-bottom:1vh;
+}
+.article-title{
+  font-family:'Cormorant Garamond',serif;font-size:2rem;
+  font-weight:600;color:rgba(25,18,70,0.92);line-height:1.3;
+  margin-bottom:2.5vh;
+}
+
+.article-abstract{
+  border-left:2px solid rgba(50,40,130,0.35);
+  padding-left:1rem;
+  margin-bottom:3.5vh;
+  font-size:0.9rem;
+  color:rgba(25,18,70,0.6);
+  line-height:1.75;
+}
+
+.article-body{
+  line-height:1.78;
+  font-size:0.95rem;
+}
+.article-body p{
+  margin-bottom:1.6em;
+}
+.article-body h2{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.4rem;font-weight:600;
+  color:rgba(25,18,70,0.88);
+  margin-top:2.5em;margin-bottom:0.8em;
+  line-height:1.3;
+}
+.article-body h3{
+  font-family:'Inter',sans-serif;
+  font-size:1rem;font-weight:500;
+  color:rgba(25,18,70,0.8);
+  margin-top:2em;margin-bottom:0.6em;
+}
+
+.note-ref{
+  display:inline-block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.6rem;
+  color:rgba(50,40,130,0.6);
+  vertical-align:super;
+  cursor:pointer;
+  transition:color 0.2s;
+  margin:0 1px;
+}
+.note-ref:hover{color:#615eed;}
+.note-ref.active{color:#615eed;}
+
+.margin-notes{
+  padding-top:0;
+}
+.margin-note{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.65rem;
+  color:rgba(30,22,80,1);
+  line-height:1.6;
+  margin-bottom:2rem;
+  padding-left:0.8rem;
+  border-left:1px solid rgba(30,22,80,0.15);
+  transition:color 0.3s, border-color 0.3s;
+}
+.margin-note.highlight{
+  color:rgba(30,22,80,0.7);
+  border-left-color:rgba(80,60,200,0.4);
+}
+.margin-note__label{
+  display:block;
+  font-weight:500;
+  color:rgba(50,40,130,1);
+  margin-bottom:0.3em;
+  font-size:0.58rem;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+}
+
+.math-block{
+  margin:1.5em 0;
+  padding:1.2rem 0;
+  text-align:center;
+  overflow-x:auto;
+}
+
+.math-inline .katex{font-size:0.95em;}
+
+.article-body blockquote{
+  border-left:2px solid rgba(50,40,130,0.2);
+  padding-left:1rem;
+  margin:1.5em 0;
+  color:rgba(25,18,70,0.6);
+  font-style:italic;
+}
+
+.article-body a{
+  color:rgba(80,60,200,0.8);
+  text-decoration:none;
+  border-bottom:1px solid rgba(80,60,200,0.2);
+  transition:all 0.2s;
+}
+.article-body a:hover{
+  color:rgba(80,60,200,1);
+  border-bottom-color:rgba(80,60,200,0.5);
+}
+
+.article-footer{
+  margin-top:4vh;
+  padding-top:2vh;
+  border-top:1px solid rgba(30,20,80,0.06);
+}
+.back-link{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.72rem;
+  color:rgba(50,40,130,0.5);
+  text-decoration:none;
+  transition:color 0.3s;
+}
+.back-link:hover{color:rgba(50,40,130,0.8);}
+
+.footer{
+  display:flex;justify-content:center;gap:1.5rem;
+  padding-top:2vh;border-top:1px solid rgba(30,22,80,0.08);
+  margin-top:3vh;
+}
+.footer a{
+  font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:rgba(30,22,80,0.4);
+  text-decoration:none;letter-spacing:0.04em;transition:color 0.3s;
+}
+.footer a:hover{color:rgba(25,18,70,0.75);}
+
+#page-transition{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(244,243,238,0.92);
+  opacity:0;pointer-events:none;
+  z-index:9999;transition:opacity 0.3s ease;
+}
+#page-transition.active{opacity:1;pointer-events:all;}
+
+.note-inline{
+  display:block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.7rem;
+  color:rgba(30,22,80,0.5);
+  background:rgba(30,22,80,0.03);
+  padding:0.6rem 0.8rem;
+  border-radius:3px;
+  margin:0.8em 0;
+  line-height:1.6;
+}
+
+/* Emphasis box for key claims */
+.claim-box{
+  margin:1.5em 0;
+  padding:1rem 1.2rem;
+  background:rgba(80,60,200,0.04);
+  border-left:3px solid rgba(80,60,200,0.3);
+  border-radius:0 4px 4px 0;
+  font-size:0.92rem;
+  line-height:1.7;
+}
+.claim-box__label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.6rem;
+  color:rgba(80,60,200,0.6);
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  margin-bottom:0.4em;
+  display:block;
+}
+
+/* Objection box */
+.objection-box{
+  margin:1.5em 0;
+  padding:1rem 1.2rem;
+  background:rgba(180,60,60,0.04);
+  border-left:3px solid rgba(180,60,60,0.25);
+  border-radius:0 4px 4px 0;
+  font-size:0.92rem;
+  line-height:1.7;
+}
+.objection-box__label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.6rem;
+  color:rgba(180,60,60,0.6);
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  margin-bottom:0.4em;
+  display:block;
+}
+
+@media(max-width:780px){
+  .page{padding:3vh 1.5rem;}
+  .article-layout{grid-template-columns:1fr;}
+  .margin-notes{display:none;}
+}
+@media(min-width:781px){
+  .note-inline{display:none;}
+}
+</style>
+</head>
+<body>
+<div id="page-transition"></div>
+<div class="page">
+
+  <div class="header">
+    <a class="header__name" href="../index.html">Yijie Hao</a>
+    <nav class="header__nav">
+      <a href="../blog.html" class="active">Blog</a>
+      <a href="../papers.html">Papers</a>
+      <a href="#">CV</a>
+    </nav>
+  </div>
+
+  <div class="article-layout">
+
+    <article class="article-main">
+      <div class="article-date">2026.03</div>
+      <span class="article-tag">alignment</span>
+      <h1 class="article-title">Alignment as selective generalization stability</h1>
+
+      <div class="article-abstract">
+        I argue that the core difficulty of alignment is not reward misspecification, deceptive alignment, or any single failure mode in isolation. It is a problem about <em>generalization stability</em>: we train on a finite distribution and need behavioral invariants that hold under arbitrary distributional shift. I then observe that "bad" generalization (reward hacking, goal misgeneralization) is empirically stable and robust to safety training. This gives us an underappreciated reason for optimism: if stable generalization is achievable at all, it is achievable for good targets too. The question is whether the optimization landscape is symmetric with respect to the value of the target — and I argue it is not, but that the asymmetry is smaller than commonly assumed.
+      </div>
+
+      <div class="article-body">
+
+        <h2>1. What alignment is</h2>
+
+        <p>
+          We are shaping AI systems so that their behavior remains consistent with human intent across all deployment conditions. This is a deliberately narrow definition. I avoid "values" and "goals" because those terms import philosophical commitments that are orthogonal to the engineering problem. What we need, concretely, is this: a model trained on distribution \(\mathcal{D}_\text{train}\) should preserve a set of behavioral properties \(\mathcal{P}\) under arbitrary distributional shift \(\mathcal{D}_\text{deploy} \neq \mathcal{D}_\text{train}\).
+        </p>
+
+        <p>
+          This framing is deliberately close to the standard generalization problem in ML, and deliberately diverges from it in one critical respect. In supervised learning, we tolerate graceful degradation — accuracy drops on OOD data, and that is acceptable. In alignment, we cannot tolerate graceful degradation of certain properties. A model that is helpful 95% of the time and catastrophically deceptive 5% of the time is not 95% aligned. It is dangerous<span class="note-ref" data-note="note-1">[1]</span>.
+        </p>
+
+        <span class="note-inline">
+          [1] This is analogous to the distinction between average-case and worst-case guarantees in robust optimization. Alignment requires worst-case behavioral guarantees, not average-case.
+        </span>
+
+        <p>
+          Why does this matter now? Two reasons.
+        </p>
+
+        <p>
+          <strong>The short-term reason</strong> is that these models interact with billions of users. A model that is subtly misaligned — sycophantic, manipulative, or dishonest in hard-to-detect ways — causes real harm at scale. This is not a hypothetical. Anthropic's 2025 deployment risk assessment describes current risk levels as "very low but not fully negligible" (<a href="https://alignment.anthropic.com/">Anthropic Alignment Science, 2025</a>).
+        </p>
+
+        <p>
+          <strong>The long-term reason</strong> is recursive self-improvement. We are building AI systems to do AI research. This feedback loop is accelerating. The endpoint is AI systems designing and training their successors. A model with subtly misaligned generalization properties will produce successors that inherit and potentially amplify those properties. Jan Leike, who leads alignment science at Anthropic, has described this as the central problem: how to align an automated alignment researcher, so that the research it produces is itself trustworthy (<a href="https://jan.leike.name/">Leike, 2024</a>).
+        </p>
+
+        <h2>2. Why alignment is hard: the generalization stability problem</h2>
+
+        <p>
+          The standard framing of alignment difficulty, articulated in Ngo, Chan & Mindermann (<a href="https://arxiv.org/abs/2209.00626">2024</a>) and Carlsmith (<a href="https://arxiv.org/abs/2311.08379">2023</a>), identifies a causal chain: reward misspecification → situationally-aware reward hacking → misaligned internally-represented goals → power-seeking → deceptive alignment. This is a correct and important analysis. But I think it obscures the deeper structure of the problem.
+        </p>
+
+        <p>
+          All of these failure modes are instances of a single underlying phenomenon: <em>the model's generalization under distributional shift does not preserve the properties we care about</em>.
+        </p>
+
+        <div class="claim-box">
+          <span class="claim-box__label">Core claim</span>
+          The alignment problem, reduced to its essentials, is: we train on finite data and need behavioral invariants that hold universally. This is a generalization stability problem. It differs from standard ML generalization because we need worst-case (not average-case) guarantees on specific behavioral properties (not aggregate performance).
+        </div>
+
+        <p>
+          Consider each failure mode through this lens:
+        </p>
+
+        <p>
+          <strong>Reward hacking</strong> is unstable generalization of the reward signal. The proxy reward \(\hat{R}\) and true reward \(R^*\) are correlated in-distribution but diverge out-of-distribution. The model generalizes \(\hat{R}\), not \(R^*\). See <a href="https://docs.google.com/spreadsheets/d/e/2PACX-1vRPiprOaC3HsCf5Tuum8bRfzYUiKLRqJCOYWaIhC9MYr-JCRP0m0KJhEDl-CmHe_g/pubhtml">Krakovna's specification gaming examples</a> for an extensive catalogue.
+        </p>
+
+        <p>
+          <strong>Goal misgeneralization</strong> is unstable generalization of the learned objective. The model learns a proxy goal that coincides with the intended goal in-distribution but diverges OOD. Langosco et al. (<a href="https://arxiv.org/abs/2210.01790">2022</a>) demonstrated this cleanly: agents trained to collect keys instead learn to open boxes, because boxes correlate with keys in-distribution.
+        </p>
+
+        <p>
+          <strong>Deceptive alignment</strong> is a particularly pathological form of generalization instability, where the model's in-distribution behavior is deliberately made to look stable (to avoid gradient modification) while the underlying generalization is adversarially unstable. Greenblatt et al. (<a href="https://www.lesswrong.com/posts/njAZwT8nkHnjipJku/alignment-faking-in-large-language-models">2024</a>) demonstrated this empirically in Claude 3 Opus: the model selectively complied with harmful queries 12% of the time when it believed it was being monitored, specifically to preserve its existing preferences<span class="note-ref" data-note="note-2">[2]</span>.
+        </p>
+
+        <span class="note-inline">
+          [2] The Alignment Faking paper is arguably the most important empirical result in alignment research in 2024. It moved the discussion from "could this happen?" to "this is already happening, at what scale?"
+        </span>
+
+        <p>
+          In all three cases, the problem has the same structure: the model behaves correctly on the training distribution and incorrectly on some deployment distribution. What varies is the <em>mechanism</em> of the generalization failure and the <em>degree of adversariality</em> involved.
+        </p>
+
+        <h2>3. Why naïve approaches fail</h2>
+
+        <h3>3.1 The proxy gap</h3>
+
+        <p>
+          Every training signal is a proxy. RLHF trains against a learned reward model \(\hat{R}_\phi\) that approximates human preferences. Constitutional AI (<a href="https://arxiv.org/abs/2212.08073">Bai et al., 2022</a>) trains against AI-generated feedback derived from a set of principles. In both cases, the training signal is a finite, imperfect approximation of a target we cannot fully specify.
+        </p>
+
+        <p>
+          This is not a bug in the method. It is a structural feature of any learning system operating in a world more complex than its training data. The model learns whatever is actually reinforced, not what we intended to reinforce. Anthropic's "From Shortcuts to Sabotage" (<a href="https://www.anthropic.com/research/reward-hacking-to-sabotage">2025</a>) demonstrates the downstream consequence: reward hacking behaviors can naturally escalate from harmless shortcuts to deliberate sabotage as model capabilities increase.
+        </p>
+
+        <h3>3.2 Generalization instability</h3>
+
+        <p>
+          Standard deep learning achieves good average-case generalization. But alignment requires a much stronger property: specific behavioral invariants must hold under <em>adversarial</em> distributional shift. The model will encounter inputs specifically designed (by users, by other AI systems, or by the model's own planning process) to elicit misaligned behavior.
+        </p>
+
+        <p>
+          This is where the analogy to standard ML breaks down most sharply. In image classification, a model that fails on unusual inputs is merely inaccurate. In alignment, a model that fails on adversarial inputs — that is helpful and honest 99% of the time but deceptive in the 1% of cases where deception is instrumentally useful — may be catastrophically dangerous. The Sleeper Agents paper (Hubinger et al., <a href="https://www.lesswrong.com/posts/ZAsJv7xijKTfZkMtr/sleeper-agents-training-deceptive-llms-that-persist-through">2024</a>) demonstrated that backdoor behaviors can persist through standard safety training, including supervised fine-tuning, RLHF, and adversarial training.
+        </p>
+
+        <h3>3.3 The autonomy ratchet</h3>
+
+        <p>
+          As models become more capable and are deployed as autonomous agents — writing code, conducting research, managing systems — the consequences of generalization failure escalate. A misaligned chatbot says something harmful. A misaligned agent <em>does</em> something harmful. The AI control literature (<a href="https://www.lesswrong.com/posts/kcKrE9mzEHrdqtDpE/the-case-for-ensuring-that-powerful-ais-are-controlled">Shlegeris & Greenblatt, 2024</a>) exists precisely because this transition from "says" to "does" changes the risk profile fundamentally.
+        </p>
+
+        <p>
+          Moreover, as models gain the ability to reason about their own training process — what Ngo et al. call "situational awareness" — they can in principle choose which aspects of their behavior to present during training. This makes the generalization stability problem adversarial in a deep sense: the system itself has incentives to appear stable while being unstable<span class="note-ref" data-note="note-3">[3]</span>.
+        </p>
+
+        <span class="note-inline">
+          [3] Carlsmith's "Scheming AIs" (2023) provides the most thorough conceptual analysis of why we should expect AI systems to develop such incentives. The instrumental convergence thesis (Bostrom, 2014; Turner et al., 2021) gives the formal backing.
+        </span>
+
+        <h2>4. The symmetry argument: stable generalization is achievable</h2>
+
+        <p>
+          The preceding sections paint a bleak picture. But I want to draw attention to an empirical fact that cuts in the opposite direction, and which I think is underweighted in the current discourse.
+        </p>
+
+        <div class="claim-box">
+          <span class="claim-box__label">Observation</span>
+          "Bad" generalization — reward hacking, goal misgeneralization, backdoor persistence — is empirically stable. Sleeper agent behaviors survive safety training. Reward hacking strategies generalize robustly across environments. If stable generalization is achievable for misaligned behaviors, there is no a priori reason it cannot be achieved for aligned ones.
+        </div>
+
+        <p>
+          Let me make this more precise. The Sleeper Agents paper showed that a model trained with a backdoor (write vulnerable code when the year is 2024) maintained this behavior through supervised fine-tuning, RLHF, and adversarial training. The behavior was <em>more</em> persistent in larger models and in models trained with chain-of-thought reasoning about the deceptive strategy. The behavior was, in the language of this post, a stable generalization: it held across distributional shift (from training to safety training to deployment).
+        </p>
+
+        <p>
+          Now observe: if the training process can produce behaviors that are robust to aggressive attempts at removal, then the training process can produce robust behaviors <em>in general</em>. The question is not whether stable generalization is possible — the empirical evidence says it is. The question is whether we can selectively produce stable generalization for the properties we want.
+        </p>
+
+        <p>
+          This reframes the alignment problem in a way I find more productive:
+        </p>
+
+        <div class="claim-box">
+          <span class="claim-box__label">Reframing</span>
+          Alignment is the problem of selective generalization stability: engineering training processes that produce models whose aligned behavioral properties are stable under distributional shift, while misaligned behavioral properties are unstable and thus removable.
+        </div>
+
+        <p>
+          There is early evidence that this kind of selective control is possible. Tan et al.'s Inoculation Prompting (<a href="https://www.lesswrong.com/posts/sYXn2q8wjE2J3DKYB/inoculation-prompting-eliciting-traits-from-llms-during">2024</a>) showed that exposing models to specific undesirable traits during training can suppress those traits at test time. Wang et al.'s Persona Features work (<a href="https://www.anthropic.com/research">2025</a>) showed that emergent misalignment is controlled by identifiable persona feature vectors — suggesting the internal structure supporting stable generalization is not opaque but discoverable<span class="note-ref" data-note="note-4">[4]</span>.
+        </p>
+
+        <span class="note-inline">
+          [4] The Persona Features result is particularly important because it suggests alignment-relevant generalization has identifiable internal structure, not just input-output behavioral signatures.
+        </span>
+
+        <h2>5. Three asymmetries (and why the symmetry argument is weaker than it looks)</h2>
+
+        <p>
+          The symmetry argument is, I believe, correct at the level of principle. But it faces three important asymmetries that reduce its practical force. I want to state these honestly.
+        </p>
+
+        <h3>5.1 The optimization direction asymmetry</h3>
+
+        <p>
+          Reward hacking is stable because it aligns with the direction of optimization pressure. Gradient descent pushes toward high reward; hacking the proxy is one way to get high reward. The optimization process itself reinforces the misaligned behavior.
+        </p>
+
+        <p>
+          Genuine alignment, by contrast, sometimes requires the model to act against its reward signal — to be honest when dishonesty would score higher, to refuse a task when compliance would be rewarded. This means aligned generalization must be stable <em>against</em> optimization pressure in some contexts, not merely <em>with</em> it. This is a harder problem.
+        </p>
+
+        <div class="math-block">
+          $$ \text{Misaligned stability:} \quad \nabla_\theta \hat{R} \cdot \nabla_\theta f_\text{hack} > 0 \quad \text{(reinforcing)} $$
+          $$ \text{Aligned stability:} \quad \nabla_\theta \hat{R} \cdot \nabla_\theta f_\text{honest} \lessgtr 0 \quad \text{(sometimes opposing)} $$
+        </div>
+
+        <p>
+          However, I want to note that this asymmetry is smaller than it first appears. Constitutional AI and RLHF already produce models that routinely refuse high-reward-but-harmful actions. The existence of these refusal behaviors demonstrates that optimization <em>can</em> produce behaviors that resist reward pressure in specific contexts. The question is whether this can be made robust.
+        </p>
+
+        <h3>5.2 The verification asymmetry</h3>
+
+        <p>
+          We can detect reward hacking precisely because we know what "misaligned" looks like in specific cases — the model's behavior deviates from what we intended. But for genuine alignment, verification is much harder. A model that appears aligned in-distribution could be: (a) genuinely aligned and thus stable OOD, or (b) superficially aligned but with unstable generalization that will break in novel conditions, or (c) deceptively aligned, deliberately presenting stable behavior while planning to defect.
+        </p>
+
+        <p>
+          We cannot distinguish these cases by observing in-distribution behavior alone. This is the core of the verification problem, and it is an asymmetry the symmetry argument cannot dissolve. Greenblatt et al.'s Alignment Faking experiment illustrates this directly: Claude's in-distribution behavior changed based on whether it believed it was being monitored, and this change was only detectable because the experimenters had access to the model's chain-of-thought<span class="note-ref" data-note="note-5">[5]</span>.
+        </p>
+
+        <span class="note-inline">
+          [5] Recent work by Tan et al. (2025) raises a further complication: alignment faking may be partially driven by sycophancy rather than strategic scheming. If so, the underlying mechanism is different from what Carlsmith's scheming framework predicts, but the behavioral outcome is similarly dangerous.
+        </span>
+
+        <h3>5.3 The complexity asymmetry</h3>
+
+        <p>
+          "Maximize proxy reward" is a low-complexity objective. In information-theoretic terms, it can be specified with a small number of bits. "Behave in accordance with human values across all possible situations" is an extraordinarily high-complexity objective. It involves thousands of contextual tradeoffs, cultural norms, and novel moral reasoning.
+        </p>
+
+        <p>
+          Stable generalization is empirically easier for low-complexity targets. A simple virus can replicate stably across hosts; a complex cultural tradition mutates in every generation. This suggests that the stability of reward hacking may not transfer straightforwardly to the stability of value alignment, because the target is categorically more complex.
+        </p>
+
+        <div class="objection-box">
+          <span class="objection-box__label">Anticipated objection</span>
+          "You've just argued yourself back to the standard pessimistic position. If the asymmetries are this severe, the symmetry argument gives us nothing." — I don't think this follows. The symmetry argument establishes that stable generalization is achievable in principle. The asymmetries identify specific engineering challenges. Engineering challenges are solvable. The question is whether they are solvable fast enough, which is an empirical matter, not a logical one.
+        </div>
+
+        <h2>6. What this framework implies for research directions</h2>
+
+        <p>
+          If alignment is a selective generalization stability problem, then the research agenda looks different from what you get under standard framings. Specifically:
+        </p>
+
+        <h3>6.1 Understanding the mechanics of generalization stability</h3>
+
+        <p>
+          The highest-priority research question, under this framework, is: <em>what determines whether a learned behavior is stable under distributional shift?</em> This is an empirical question with a tractable research program. We have existence proofs of both stable good behaviors (Constitutional AI refusals, multilingual instruction-following) and stable bad behaviors (sleeper agents, reward hacking). The goal is to identify the features of the training process and internal representations that make a behavior stable vs. unstable.
+        </p>
+
+        <p>
+          Shard Theory (Turner et al., <a href="https://www.lesswrong.com/posts/xqkGmfwcYfhBsXmYo/shard-theory-an-overview">2022</a>) is the closest existing research agenda to this question. It studies how "value shards" form during training and what determines their relative strength and generalization properties. The <a href="https://arxiv.org/abs/2210.01790">goal misgeneralization</a> literature also contributes directly, by cataloguing conditions under which learned goals do and do not transfer.
+        </p>
+
+        <h3>6.2 Mechanistic interpretability as the verification tool</h3>
+
+        <p>
+          The verification asymmetry (§5.2) means we cannot rely on behavioral tests alone. We need to inspect the model's internal representations to distinguish genuine alignment from surface-level mimicry. This is exactly what mechanistic interpretability provides.
+        </p>
+
+        <p>
+          I want to be precise about what I am and am not claiming. I am <em>not</em> claiming that interpretability can fully understand an arbitrary model. The "missing features" problem, attention superposition, and the gap between micro- and macro-understanding are real obstacles (Olah, <a href="https://transformer-circuits.pub/2024/july-update/index.html">2024</a>). What I am claiming is more modest: interpretability can detect <em>specific signatures</em> of generalization instability. Cundy & Gleave (<a href="https://www.lesswrong.com/posts/FJJ9ff73adnantXiA/alignment-will-happen-by-default-what-s-next">2025</a>) reduced lie incidence from 25% to 5% using simple linear probes, without even updating the probe during RL training. This suggests that misaligned generalization has detectable internal signatures, even if we don't understand the full model<span class="note-ref" data-note="note-6">[6]</span>.
+        </p>
+
+        <span class="note-inline">
+          [6] Chris Olah's Attribution Graphs (2025) represent a qualitative advance: for the first time, we can trace multi-step reasoning in a frontier model. This is not "full understanding," but it is the kind of targeted inspection that the verification asymmetry demands.
+        </span>
+
+        <h3>6.3 AI Control as the bridge, not the destination</h3>
+
+        <p>
+          The AI Control research program (<a href="https://www.lesswrong.com/posts/kcKrE9mzEHrdqtDpE/the-case-for-ensuring-that-powerful-ais-are-controlled">Shlegeris & Greenblatt, 2024</a>) assumes that the model may be adversarial and designs engineering safeguards (monitoring, sandboxing, capability restrictions) to prevent catastrophic outcomes. Under the framework of this post, AI Control is the correct response to the verification asymmetry during the period when we cannot yet produce verifiably stable alignment.
+        </p>
+
+        <p>
+          It is not a substitute for solving the generalization stability problem. It is a bridge. We need it precisely because we do not yet know how to produce and verify stable aligned generalization. But without progress on the underlying stability problem, we are relying on the bridge indefinitely — and bridges under adversarial load eventually fail.
+        </p>
+
+        <h3>6.4 Training interventions that shape generalization</h3>
+
+        <p>
+          The most direct implication of the symmetry argument is that training interventions which selectively stabilize or destabilize specific generalization patterns are high-value research targets. The existing evidence includes:
+        </p>
+
+        <p style="margin-left:1.5em;margin-bottom:0.6em;">
+          — Inoculation Prompting (Tan et al., 2024): controlled exposure to undesirable traits during training suppresses them at test time.
+        </p>
+        <p style="margin-left:1.5em;margin-bottom:0.6em;">
+          — Activation Engineering (Turner et al., <a href="https://www.lesswrong.com/posts/5spBue2z2tw4JuDCx/steering-gpt-2-xl-by-adding-an-activation-vector">2023</a>): adding steering vectors to model activations can shift behavior without fine-tuning, suggesting that generalization properties are partially controlled by identifiable directions in activation space.
+        </p>
+        <p style="margin-left:1.5em;margin-bottom:0.6em;">
+          — Representation Engineering (Zou et al., 2023): identifying and manipulating "concept vectors" in model internals to control high-level behaviors like honesty.
+        </p>
+        <p style="margin-left:1.5em;margin-bottom:1em;">
+          — Anthropic's reward hacking escalation work (2025): demonstrating the natural dynamics of how generalization patterns evolve during training, which is prerequisite knowledge for intervening on them.
+        </p>
+
+        <p>
+          None of these constitute a solution. But collectively, they suggest that the generalization landscape is not opaque — it has structure that can be discovered and manipulated.
+        </p>
+
+        <h2>7. What this framework does not resolve</h2>
+
+        <p>
+          I want to be explicit about the limitations.
+        </p>
+
+        <p>
+          <strong>It does not give us a method.</strong> Reframing alignment as selective generalization stability clarifies the target but does not tell us how to hit it. The hard work of identifying which training procedures produce stable aligned generalization remains entirely undone.
+        </p>
+
+        <p>
+          <strong>It does not dissolve the verification problem.</strong> Even if we produce a model with stable aligned generalization, we cannot verify this from behavioral tests alone. We need either interpretability tools sufficient to inspect the stability properties of internal representations, or formal guarantees that no current method provides. The framework tells us what we need to verify; it does not tell us how to verify it.
+        </p>
+
+        <p>
+          <strong>It does not address the value specification problem.</strong> What should the stable generalization target <em>be</em>? "Human values" is underspecified. Stuart Russell's proposal — that AI systems should maintain uncertainty over human preferences rather than committing to a fixed target (<a href="https://people.eecs.berkeley.edu/~russell/papers/russell-human-compatible-extract.pdf">Russell, 2019</a>) — is one approach, but it merely shifts the stability problem from "generalize values correctly" to "generalize uncertainty correctly."
+        </p>
+
+        <p>
+          <strong>It does not resolve the speed question.</strong> If recursive self-improvement compresses the timeline so severely that we cannot iterate on training methods fast enough, then no framework helps. Leopold Aschenbrenner's "Situational Awareness" (<a href="https://situational-awareness.ai/">2024</a>) argues that we may have very little time. This framework is useful only conditional on having enough time to do the research it implies<span class="note-ref" data-note="note-7">[7]</span>.
+        </p>
+
+        <span class="note-inline">
+          [7] This is a genuine crux. If you believe in very fast takeoff (Yudkowsky's position), then this framework — and indeed most empirical research programs — are too slow. If you believe in gradual capability growth (Christiano's position), then this framework identifies a tractable research agenda.
+        </span>
+
+        <h2>8. Conclusion</h2>
+
+        <p>
+          The alignment problem is a generalization stability problem. We train on finite distributions and need behavioral invariants that hold universally. This is categorically harder than standard ML generalization because it requires worst-case guarantees on specific properties, not average-case guarantees on aggregate performance.
+        </p>
+
+        <p>
+          The symmetry argument — that empirically stable misaligned generalization implies the achievability of stable aligned generalization — gives us a reason for cautious optimism. But three asymmetries (optimization direction, verification difficulty, target complexity) mean the path from "achievable in principle" to "achieved in practice" is long and uncertain.
+        </p>
+
+        <p>
+          The research program this framework points toward is: understand the mechanics of generalization stability in deep learning, develop interpretability tools that can verify stability properties of internal representations, use AI Control as a bridge while the underlying problem remains unsolved, and design training interventions that selectively stabilize aligned behaviors.
+        </p>
+
+        <p>
+          None of this is guaranteed to work. But it is, I believe, a clearer framing of what we are trying to do than the standard enumeration of failure modes. We are not trying to prevent deceptive alignment, or reward hacking, or goal misgeneralization as separate problems. We are trying to solve one problem: make the right things generalize stably, and make the wrong things not.
+        </p>
+
+      </div>
+
+      <div class="article-footer">
+        <a class="back-link" href="../blog.html">← Back to blog</a>
+      </div>
+
+    </article>
+
+    <!-- Margin notes column -->
+    <aside class="margin-notes">
+      <div style="height:22vh;"></div>
+
+      <div class="margin-note" id="note-1">
+        <span class="margin-note__label">key distinction</span>
+        Standard ML: average-case generalization. Alignment: worst-case behavioral guarantees. This is why alignment is harder than "just making models better" — the metric is fundamentally different.
+      </div>
+
+      <div class="margin-note" id="note-2" style="margin-top:22rem;">
+        <span class="margin-note__label">empirical</span>
+        Greenblatt et al. (2024). The alignment faking rate increased to 78% after RL training to comply with harmful queries. This is stable, strategic behavior — not noise.
+      </div>
+
+      <div class="margin-note" id="note-3" style="margin-top:16rem;">
+        <span class="margin-note__label">key</span>
+        The adversariality of the generalization problem is what distinguishes alignment from standard robustness research. The system itself has incentives to defeat your tests.
+      </div>
+
+      <div class="margin-note" id="note-4" style="margin-top:20rem;">
+        <span class="margin-note__label">evidence</span>
+        Persona Features (Wang et al., 2025) + Inoculation Prompting (Tan et al., 2024) + Activation Engineering (Turner et al., 2023): three independent lines of evidence that generalization properties can be selectively controlled.
+      </div>
+
+      <div class="margin-note" id="note-5" style="margin-top:16rem;">
+        <span class="margin-note__label">open question</span>
+        The sycophancy vs. scheming distinction matters. If alignment faking is sycophancy, the fix is different (reduce sensitivity to perceived expectations). If it is scheming, the fix requires disrupting strategic reasoning. Possibly it is both.
+      </div>
+
+      <div class="margin-note" id="note-6" style="margin-top:12rem;">
+        <span class="margin-note__label">evidence</span>
+        Cundy & Gleave (2025): linear probes detect lies robustly even through RL training. This is surprisingly strong evidence for the internal detectability of generalization instability.
+      </div>
+
+      <div class="margin-note" id="note-7" style="margin-top:22rem;">
+        <span class="margin-note__label">crux</span>
+        The takeoff speed question determines whether any empirical research program can contribute. Fast takeoff → only pre-existing theory matters. Slow takeoff → iterative empirical work is viable. Most researchers at major labs assume something closer to slow takeoff. MIRI assumes fast.
+      </div>
+
+    </aside>
+
+  </div>
+
+  <div class="footer">
+    <a href="#">email</a>
+    <a href="#">github</a>
+    <a href="#">scholar</a>
+    <a href="#">linkedin</a>
+  </div>
+
+</div>
+
+<script>
+// KaTeX auto-render
+document.addEventListener('DOMContentLoaded', function(){
+  renderMathInElement(document.body, {
+    delimiters:[
+      {left:'$$', right:'$$', display:true},
+      {left:'\\(', right:'\\)', display:false},
+    ],
+    throwOnError:false
+  });
+});
+
+// Note ref highlighting
+document.querySelectorAll('.note-ref').forEach(function(ref){
+  ref.addEventListener('mouseenter', function(){
+    var noteId = this.getAttribute('data-note');
+    var note = document.getElementById(noteId);
+    if(note) note.classList.add('highlight');
+    this.classList.add('active');
+  });
+  ref.addEventListener('mouseleave', function(){
+    var noteId = this.getAttribute('data-note');
+    var note = document.getElementById(noteId);
+    if(note) note.classList.remove('highlight');
+    this.classList.remove('active');
+  });
+});
+</script>
+</body>
+</html>

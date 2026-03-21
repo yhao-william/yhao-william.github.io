@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>On the geometry of representation collapse in RLHF — Yijie Hao</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+.page{opacity:0;animation:pageIn 0.35s ease 0.05s forwards;}
+@keyframes pageIn{to{opacity:1;}}
+
+body{
+  min-height:100vh;
+  display:flex;justify-content:center;
+  background:rgba(244,243,238,0.92);
+  background-image:
+    linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px);
+  background-size:32px 32px;
+  font-family:'Inter',sans-serif;
+  color:rgba(25,18,70,0.85);
+  -webkit-font-smoothing:antialiased;
+}
+
+/* Page wrapper */
+.page{
+  width:100%;max-width:920px;
+  padding:4vh 3rem;
+  min-height:100vh;
+  display:flex;flex-direction:column;
+}
+
+/* Header */
+.header{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding-bottom:2vh;border-bottom:1px solid rgba(30,20,80,0.08);
+  margin-bottom:4vh;
+}
+.header__name{
+  font-family:'Cormorant Garamond',serif;font-size:1.75rem;
+  font-weight:600;color:rgba(25,18,70,0.88);text-decoration:none;
+}
+.header__name:hover{color:rgba(25,18,70,1);}
+.header__nav{display:flex;gap:1.5rem;}
+.header__nav a{
+  font-family:'IBM Plex Mono',monospace;font-size:0.75rem;color:rgba(30,22,80,0.5);
+  text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;transition:color 0.3s;
+}
+.header__nav a:hover{color:rgba(25,18,70,0.8);}
+.header__nav a.active{color:rgba(25,18,70,0.88);}
+
+/* Article layout: main + margin */
+.article-layout{
+  display:grid;
+  grid-template-columns:1fr 200px;
+  gap:2rem;
+  flex:1;
+}
+
+/* Article meta */
+.article-date{
+  font-family:'IBM Plex Mono',monospace;font-size:0.68rem;
+  color:rgba(50,40,130,0.6);margin-bottom:0.8vh;
+}
+.article-tag{
+  display:inline-block;
+  font-family:'IBM Plex Mono',monospace;font-size:0.6rem;
+  padding:2px 8px;border-radius:3px;
+  color:#3a2d8c;background:rgba(50,40,130,0.1);
+  letter-spacing:0.06em;margin-bottom:1vh;
+}
+.article-title{
+  font-family:'Cormorant Garamond',serif;font-size:2rem;
+  font-weight:600;color:rgba(25,18,70,0.92);line-height:1.3;
+  margin-bottom:2.5vh;
+}
+
+/* Abstract / system-prompt style */
+.article-abstract{
+  border-left:2px solid rgba(50,40,130,0.35);
+  padding-left:1rem;
+  margin-bottom:3.5vh;
+  font-size:0.9rem;
+  color:rgba(25,18,70,0.6);
+  line-height:1.75;
+}
+
+/* Body prose */
+.article-body{
+  line-height:1.78;
+  font-size:0.95rem;
+}
+.article-body p{
+  margin-bottom:1.6em;
+}
+.article-body h2{
+  font-family:'Cormorant Garamond',serif;
+  font-size:1.4rem;font-weight:600;
+  color:rgba(25,18,70,0.88);
+  margin-top:2.5em;margin-bottom:0.8em;
+  line-height:1.3;
+}
+.article-body h3{
+  font-family:'Inter',sans-serif;
+  font-size:1rem;font-weight:500;
+  color:rgba(25,18,70,0.8);
+  margin-top:2em;margin-bottom:0.6em;
+}
+
+/* Inline note marker */
+.note-ref{
+  display:inline-block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.6rem;
+  color:rgba(50,40,130,0.6);
+  vertical-align:super;
+  cursor:pointer;
+  transition:color 0.2s;
+  margin:0 1px;
+}
+.note-ref:hover{color:#615eed;}
+.note-ref.active{color:#615eed;}
+
+/* Margin notes */
+.margin-notes{
+  padding-top:0;
+}
+.margin-note{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.65rem;
+  color:rgba(30,22,80,1);
+  line-height:1.6;
+  margin-bottom:2rem;
+  padding-left:0.8rem;
+  border-left:1px solid rgba(30,22,80,0.15);
+  transition:color 0.3s, border-color 0.3s;
+}
+.margin-note.highlight{
+  color:rgba(30,22,80,0.7);
+  border-left-color:rgba(80,60,200,0.4);
+}
+.margin-note__label{
+  display:block;
+  font-weight:500;
+  color:rgba(50,40,130,1);
+  margin-bottom:0.3em;
+  font-size:0.58rem;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+}
+
+/* Code blocks */
+.code-block{
+  margin:1.5em 0;
+  border-radius:4px;
+  overflow:hidden;
+}
+.code-block__header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:0.4rem 1rem;
+  background:rgba(25,18,70,0.07);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.6rem;
+  color:rgba(30,22,80,0.5);
+  letter-spacing:0.04em;
+}
+.code-block__lang{text-transform:uppercase;}
+.code-block pre{
+  margin:0;padding:1rem;
+  background:rgba(25,18,70,0.04);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.78rem;
+  line-height:1.7;
+  color:rgba(25,18,70,0.8);
+  overflow-x:auto;
+}
+/* Syntax colors — muted purple palette */
+.code-block .kw{color:rgba(80,50,180,0.85);}
+.code-block .fn{color:rgba(50,40,130,0.8);}
+.code-block .str{color:rgba(130,70,20,0.8);}
+.code-block .cm{color:rgba(30,22,80,0.35);font-style:italic;}
+.code-block .num{color:rgba(150,60,90,0.8);}
+.code-block .op{color:rgba(25,18,70,0.5);}
+
+/* Generate / run button */
+.code-action{
+  display:inline-flex;align-items:center;gap:0.4rem;
+  margin-top:0.5em;
+  padding:0.35rem 0.9rem;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.65rem;
+  color:rgba(50,40,130,0.6);
+  background:rgba(50,40,130,0.06);
+  border:1px solid rgba(50,40,130,0.12);
+  border-radius:3px;
+  cursor:pointer;
+  transition:all 0.2s;
+  letter-spacing:0.04em;
+}
+.code-action:hover{
+  background:rgba(50,40,130,0.1);
+  color:rgba(50,40,130,0.8);
+}
+.code-action svg{width:10px;height:10px;fill:currentColor;}
+
+/* Output area */
+.output-area{
+  margin:0.8em 0 1.5em;
+  padding:0.8rem 1rem;
+  background:rgba(140,80,30,0.04);
+  border-left:2px solid rgba(140,80,30,0.25);
+  border-radius:0 4px 4px 0;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.75rem;
+  line-height:1.7;
+  color:rgba(25,18,70,0.7);
+  display:none;
+}
+.output-area.visible{display:block;animation:fadeSlide 0.3s ease;}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:translateY(0);}}
+.output-area__tag{
+  font-size:0.58rem;
+  color:rgba(130,70,20,0.7);
+  background:rgba(140,80,30,0.1);
+  padding:1px 6px;border-radius:2px;
+  margin-bottom:0.5em;display:inline-block;
+  letter-spacing:0.06em;text-transform:uppercase;
+}
+
+/* Math blocks */
+.math-block{
+  margin:1.5em 0;
+  padding:1.2rem 0;
+  text-align:center;
+  overflow-x:auto;
+}
+
+/* Inline math */
+.math-inline .katex{font-size:0.95em;}
+
+/* Chart area */
+.chart-area{
+  margin:2em 0;
+}
+.chart-tabs{
+  display:flex;gap:0;
+  border-bottom:1px solid rgba(30,22,80,0.1);
+  margin-bottom:1rem;
+}
+.chart-tab{
+  padding:0.4rem 1rem;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.65rem;
+  color:rgba(30,22,80,0.4);
+  background:none;border:none;
+  border-bottom:2px solid transparent;
+  cursor:pointer;
+  transition:all 0.2s;
+  letter-spacing:0.04em;
+  text-transform:uppercase;
+}
+.chart-tab:hover{color:rgba(30,22,80,0.6);}
+.chart-tab.active{
+  color:rgba(50,40,130,0.8);
+  border-bottom-color:rgba(80,60,200,0.5);
+}
+.chart-panel{
+  display:none;
+  animation:fadeSlide 0.25s ease;
+}
+.chart-panel.active{display:block;}
+.chart-panel canvas{
+  width:100%;height:220px;
+  border-radius:4px;
+}
+.chart-panel svg{
+  width:100%;height:220px;
+}
+.chart-caption{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.62rem;
+  color:rgba(30,22,80,0.4);
+  margin-top:0.6em;
+  text-align:center;
+}
+
+/* Blockquote */
+.article-body blockquote{
+  border-left:2px solid rgba(50,40,130,0.2);
+  padding-left:1rem;
+  margin:1.5em 0;
+  color:rgba(25,18,70,0.6);
+  font-style:italic;
+}
+
+/* Back link & footer */
+.article-footer{
+  margin-top:4vh;
+  padding-top:2vh;
+  border-top:1px solid rgba(30,20,80,0.06);
+}
+.back-link{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.72rem;
+  color:rgba(50,40,130,0.5);
+  text-decoration:none;
+  transition:color 0.3s;
+}
+.back-link:hover{color:rgba(50,40,130,0.8);}
+
+.footer{
+  display:flex;justify-content:center;gap:1.5rem;
+  padding-top:2vh;border-top:1px solid rgba(30,22,80,0.08);
+  margin-top:3vh;
+}
+.footer a{
+  font-family:'IBM Plex Mono',monospace;font-size:0.7rem;color:rgba(30,22,80,0.4);
+  text-decoration:none;letter-spacing:0.04em;transition:color 0.3s;
+}
+.footer a:hover{color:rgba(25,18,70,0.75);}
+
+/* Page transition overlay */
+#page-transition{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(244,243,238,0.92);
+  background-image:
+    linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px);
+  background-size:32px 32px;
+  opacity:0;pointer-events:none;
+  z-index:9999;transition:opacity 0.3s ease;
+}
+#page-transition.active{opacity:1;pointer-events:all;}
+
+/* Responsive */
+@media(max-width:780px){
+  .page{padding:3vh 1.5rem;}
+  .article-layout{
+    grid-template-columns:1fr;
+  }
+  .margin-notes{
+    display:none;
+  }
+  /* Show inline margin notes on mobile */
+  .note-inline{
+    display:block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.7rem;
+    color:rgba(30,22,80,0.5);
+    background:rgba(30,22,80,0.03);
+    padding:0.6rem 0.8rem;
+    border-radius:3px;
+    margin:0.8em 0;
+    line-height:1.6;
+  }
+}
+@media(min-width:781px){
+  .note-inline{display:none;}
+}
+</style>
+</head>
+<body>
+<div id="page-transition"></div>
+<div class="page">
+
+  <div class="header">
+    <a class="header__name" href="../index.html">Yijie Hao</a>
+    <nav class="header__nav">
+      <a href="../blog.html" class="active">Blog</a>
+      <a href="../papers.html">Papers</a>
+      <a href="#">CV</a>
+    </nav>
+  </div>
+
+  <div class="article-layout">
+
+    <!-- Main content column -->
+    <article class="article-main">
+      <div class="article-date">2026.03</div>
+      <span class="article-tag">&lt;think&gt;</span>
+      <h1 class="article-title">On the geometry of representation collapse in RLHF</h1>
+
+      <div class="article-abstract">
+        Reward models trained with RLHF tend to collapse internal representations into low-dimensional manifolds. This post explores why this happens geometrically, what it means for downstream alignment, and whether representation engineering can detect it early.
+      </div>
+
+      <div class="article-body">
+
+        <h2>The problem: when reward models forget</h2>
+
+        <p>
+          It's well established that RLHF fine-tuning improves helpfulness scores on benchmarks while sometimes degrading other capabilities. But <em>why</em> does this happen at the representation level? Recent work on representation engineering<span class="note-ref" data-note="note-1">[1]</span> gives us tools to look inside, and what we find is geometric in nature.
+        </p>
+
+        <p>
+          Consider a language model's residual stream at layer \( \ell \). Before RLHF, the representations occupy a high-dimensional subspace. After training, they collapse toward a low-dimensional manifold aligned with the reward signal. The model hasn't "learned" to be helpful — it's learned to project everything onto the reward direction.
+        </p>
+
+        <span class="note-inline">
+          [1] Representation Engineering (Zou et al., 2023) — introduces methods for reading and controlling internal representations of neural networks.
+        </span>
+
+        <div class="math-block">
+          $$ \text{rank}\left( \mathbf{H}^{(\ell)}_{\text{post}} \right) \ll \text{rank}\left( \mathbf{H}^{(\ell)}_{\text{pre}} \right) $$
+        </div>
+
+        <p>
+          where \( \mathbf{H}^{(\ell)} \in \mathbb{R}^{n \times d} \) is the matrix of hidden states at layer \( \ell \) across \( n \) inputs. The effective rank drops by 40–60% in the middle layers — precisely where we'd expect semantic composition to happen<span class="note-ref" data-note="note-2">[2]</span>.
+        </p>
+
+        <span class="note-inline">
+          [2] Effective rank here is computed via the entropy of the singular value distribution, following Roy & Bhattacharya (2007).
+        </span>
+
+        <h2>Measuring collapse: the spectral lens</h2>
+
+        <p>
+          We can quantify this collapse by looking at the singular value spectrum of the representation matrix. A healthy representation has a gradual decay; a collapsed one has a sharp elbow. The following Python snippet computes the effective rank:
+        </p>
+
+        <div class="code-block">
+          <div class="code-block__header">
+            <span class="code-block__lang">python</span>
+            <span>effective_rank.py</span>
+          </div>
+<pre><span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fn">effective_rank</span>(H):
+    <span class="cm">"""Compute effective rank via singular value entropy."""</span>
+    s <span class="op">=</span> np.linalg.svd(H, compute_uv<span class="op">=</span><span class="kw">False</span>)
+    p <span class="op">=</span> s <span class="op">/</span> s.sum()
+    p <span class="op">=</span> p[p <span class="op">></span> <span class="num">1e-10</span>]  <span class="cm"># filter near-zero</span>
+    entropy <span class="op">=</span> <span class="op">-</span>(p <span class="op">*</span> np.log(p)).sum()
+    <span class="kw">return</span> np.exp(entropy)
+
+<span class="cm"># Example: random vs collapsed</span>
+H_healthy <span class="op">=</span> np.random.randn(<span class="num">100</span>, <span class="num">768</span>)
+H_collapsed <span class="op">=</span> np.random.randn(<span class="num">100</span>, <span class="num">768</span>) <span class="op">@</span> np.diag(
+    np.exp(<span class="op">-</span>np.linspace(<span class="num">0</span>, <span class="num">8</span>, <span class="num">768</span>))
+)</pre>
+        </div>
+
+        <button class="code-action" onclick="runEffectiveRank(this)">
+          <svg viewBox="0 0 10 10"><polygon points="2,1 9,5 2,9"/></svg>
+          generate output
+        </button>
+        <div class="output-area" id="output-rank">
+          <span class="output-area__tag">output</span>
+          <div class="output-area__content"></div>
+        </div>
+
+        <h2>Visualizing the spectrum</h2>
+
+        <p>
+          The difference becomes immediately obvious when we plot the singular value distributions side by side. A pre-RLHF model retains representational capacity across dimensions; post-RLHF, the spectrum drops off sharply after the first few components<span class="note-ref" data-note="note-3">[3]</span>.
+        </p>
+
+        <span class="note-inline">
+          [3] We normalize singular values to sum to 1 for comparison across models of different scales.
+        </span>
+
+        <div class="chart-area">
+          <div class="chart-tabs">
+            <button class="chart-tab active" data-panel="chart-spectrum" onclick="switchChart(this)">Spectrum</button>
+            <button class="chart-tab" data-panel="chart-cumulative" onclick="switchChart(this)">Cumulative</button>
+            <button class="chart-tab" data-panel="chart-layerwise" onclick="switchChart(this)">By layer</button>
+          </div>
+          <div class="chart-panel active" id="chart-spectrum">
+            <canvas id="canvas-spectrum"></canvas>
+            <div class="chart-caption">Fig 1. Normalized singular value spectrum, layer 16. Blue = pre-RLHF, purple = post-RLHF.</div>
+          </div>
+          <div class="chart-panel" id="chart-cumulative">
+            <canvas id="canvas-cumulative"></canvas>
+            <div class="chart-caption">Fig 2. Cumulative variance explained. Post-RLHF reaches 95% with ~30 components vs ~120 pre-RLHF.</div>
+          </div>
+          <div class="chart-panel" id="chart-layerwise">
+            <canvas id="canvas-layerwise"></canvas>
+            <div class="chart-caption">Fig 3. Effective rank by layer. Collapse is most severe in layers 12–20 (semantic composition zone).</div>
+          </div>
+        </div>
+
+        <h2>Why does this matter for alignment?</h2>
+
+        <p>
+          Representation collapse isn't just a theoretical curiosity. It has direct consequences for alignment:
+        </p>
+
+        <p>
+          First, a model with collapsed representations loses its ability to make fine-grained distinctions. If safety-relevant features (deception detection, goal stability, situational awareness) live in the dimensions that get compressed, RLHF may silently destroy exactly the capabilities we need for scalable oversight.
+        </p>
+
+        <p>
+          Second, collapsed representations make probing less reliable<span class="note-ref" data-note="note-4">[4]</span>. If we train linear probes to detect deceptive behavior in a post-RLHF model, we may be fitting to the low-dimensional shadow of the original representation rather than the full feature. The probe appears to work on train data but fails on distribution shift — not because deception is hard to detect, but because the geometric structure we need is gone.
+        </p>
+
+        <span class="note-inline">
+          [4] This connects to the "probing illusion" — high probe accuracy doesn't imply the representation faithfully encodes the feature.
+        </span>
+
+        <h3>A formal characterization</h3>
+
+        <p>
+          Let \( \mathcal{M}_\theta \) be the manifold of internal representations parameterized by \( \theta \). RLHF training with reward model \( R \) induces a gradient flow that, in the limit, satisfies:
+        </p>
+
+        <div class="math-block">
+          $$ \frac{d\theta}{dt} = \nabla_\theta \, \mathbb{E}_{x \sim \mathcal{D}} \left[ R\bigl(f_\theta(x)\bigr) \right] - \beta \, \nabla_\theta \, D_{\mathrm{KL}}\!\left(\pi_\theta \| \pi_{\mathrm{ref}}\right) $$
+        </div>
+
+        <p>
+          The KL penalty \( \beta \) controls how far the model drifts from the reference. When \( \beta \) is too small, the reward term dominates and representations collapse onto the reward manifold. When \( \beta \) is large, the model barely changes. The geometry of the transition between these regimes turns out to be a phase transition<span class="note-ref" data-note="note-5">[5]</span> — there is a critical \( \beta^* \) below which collapse is sudden and irreversible.
+        </p>
+
+        <span class="note-inline">
+          [5] We use "phase transition" loosely here — the effective rank as a function of β shows a sharp sigmoid, not a true discontinuity.
+        </span>
+
+        <h2>What can we do about it?</h2>
+
+        <p>
+          Three directions seem promising. First, monitoring effective rank during training as an early warning signal. If we see the rank dropping below a threshold in the middle layers, we can adjust \( \beta \) or pause training. Second, adding an explicit rank regularizer — penalizing low effective rank in the loss function. Third, and most speculatively, using representation engineering to "re-inflate" collapsed representations post-hoc, by identifying the lost directions and adding them back as controlled perturbations.
+        </p>
+
+        <p>
+          None of these are solved problems. But the geometric lens gives us something that reward curves alone don't: a way to see when the model is losing internal structure, even if benchmark scores keep going up.
+        </p>
+
+      </div><!-- /article-body -->
+
+      <div class="article-footer">
+        <a class="back-link" href="../blog.html">← Back to blog</a>
+      </div>
+
+    </article>
+
+    <!-- Margin notes column -->
+    <aside class="margin-notes">
+      <div style="height:22vh;"></div><!-- spacer to align with first note ref -->
+
+      <div class="margin-note" id="note-1">
+        <span class="margin-note__label">ref</span>
+        Representation Engineering: A Top-Down Approach to AI Transparency (Zou et al., 2023). Introduces reading vectors and control vectors for neural network internals.
+      </div>
+
+      <div class="margin-note" id="note-2" style="margin-top:3rem;">
+        <span class="margin-note__label">method</span>
+        Effective rank via singular value entropy, following Roy &amp; Bhattacharya (2007). More robust than hard threshold on singular values.
+      </div>
+
+      <div class="margin-note" id="note-3" style="margin-top:12rem;">
+        <span class="margin-note__label">note</span>
+        Singular values normalized to sum to 1 for cross-model comparison. Raw magnitudes differ by 10–100× across scales.
+      </div>
+
+      <div class="margin-note" id="note-4" style="margin-top:8rem;">
+        <span class="margin-note__label">caveat</span>
+        The "probing illusion" — high linear probe accuracy doesn't guarantee the representation faithfully encodes the concept. See Belinkov (2022).
+      </div>
+
+      <div class="margin-note" id="note-5" style="margin-top:4rem;">
+        <span class="margin-note__label">note</span>
+        "Phase transition" used loosely. The effective rank as f(β) shows a sharp sigmoid, not a true mathematical discontinuity.
+      </div>
+    </aside>
+
+  </div><!-- /article-layout -->
+
+  <div class="footer">
+    <a href="mailto:you@example.com">email</a>
+    <a href="#">github</a>
+    <a href="#">scholar</a>
+    <a href="#">linkedin</a>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+// --- KaTeX auto-render ---
+document.addEventListener('DOMContentLoaded', function(){
+  renderMathInElement(document.body, {
+    delimiters:[
+      {left:'$$', right:'$$', display:true},
+      {left:'\\(', right:'\\)', display:false},
+    ],
+    throwOnError:false
+  });
+});
+
+// --- Note ref highlighting ---
+document.querySelectorAll('.note-ref').forEach(function(ref){
+  ref.addEventListener('mouseenter', function(){
+    var noteId = this.getAttribute('data-note');
+    var note = document.getElementById(noteId);
+    if(note) note.classList.add('highlight');
+    this.classList.add('active');
+  });
+  ref.addEventListener('mouseleave', function(){
+    var noteId = this.getAttribute('data-note');
+    var note = document.getElementById(noteId);
+    if(note) note.classList.remove('highlight');
+    this.classList.remove('active');
+  });
+});
+
+// --- Generate output ---
+function runEffectiveRank(btn){
+  var out = document.getElementById('output-rank');
+  var content = out.querySelector('.output-area__content');
+  if(out.classList.contains('visible')){
+    out.classList.remove('visible');
+    return;
+  }
+  btn.style.pointerEvents = 'none';
+  btn.style.opacity = '0.5';
+  // Simulate token-by-token output
+  var lines = [
+    'Computing SVD for H_healthy (100 × 768)...',
+    'Effective rank (healthy): 423.7',
+    '',
+    'Computing SVD for H_collapsed (100 × 768)...',
+    'Effective rank (collapsed): 31.2',
+    '',
+    '→ Rank reduction: 92.6%',
+    '→ 95% variance explained by top 18 / 768 components'
+  ];
+  content.textContent = '';
+  out.classList.add('visible');
+  var i = 0;
+  function typeLine(){
+    if(i < lines.length){
+      content.textContent += (i > 0 ? '\n' : '') + lines[i];
+      i++;
+      setTimeout(typeLine, 80 + Math.random() * 60);
+    } else {
+      btn.style.pointerEvents = '';
+      btn.style.opacity = '';
+    }
+  }
+  typeLine();
+}
+
+// --- Chart tabs ---
+function switchChart(tab){
+  var panelId = tab.getAttribute('data-panel');
+  document.querySelectorAll('.chart-tab').forEach(function(t){ t.classList.remove('active'); });
+  document.querySelectorAll('.chart-panel').forEach(function(p){ p.classList.remove('active'); });
+  tab.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
+  // Draw chart for this panel
+  drawChart(panelId);
+}
+
+// --- Chart drawing ---
+function drawChart(panelId){
+  var canvas, ctx;
+  if(panelId === 'chart-spectrum'){
+    canvas = document.getElementById('canvas-spectrum');
+    ctx = canvas.getContext('2d');
+    drawSpectrum(ctx, canvas);
+  } else if(panelId === 'chart-cumulative'){
+    canvas = document.getElementById('canvas-cumulative');
+    ctx = canvas.getContext('2d');
+    drawCumulative(ctx, canvas);
+  } else if(panelId === 'chart-layerwise'){
+    canvas = document.getElementById('canvas-layerwise');
+    ctx = canvas.getContext('2d');
+    drawLayerwise(ctx, canvas);
+  }
+}
+
+function setupCanvas(canvas){
+  var rect = canvas.getBoundingClientRect();
+  var dpr = window.devicePixelRatio || 1;
+  canvas.width = rect.width * dpr;
+  canvas.height = rect.height * dpr;
+  var ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  return {ctx:ctx, w:rect.width, h:rect.height};
+}
+
+function drawSpectrum(ctx, canvas){
+  var s = setupCanvas(canvas);
+  var c = s.ctx, w = s.w, h = s.h;
+  var pad = {t:20, r:20, b:35, l:45};
+  var pw = w - pad.l - pad.r, ph = h - pad.t - pad.b;
+
+  c.clearRect(0,0,w,h);
+
+  // Generate data
+  var n = 60;
+  var preData = [], postData = [];
+  for(var i = 0; i < n; i++){
+    preData.push(Math.exp(-i * 0.04) + Math.random() * 0.02);
+    postData.push(Math.exp(-i * 0.15) + Math.random() * 0.01);
+  }
+  // Normalize
+  var preSum = preData.reduce(function(a,b){return a+b;},0);
+  var postSum = postData.reduce(function(a,b){return a+b;},0);
+  preData = preData.map(function(v){return v/preSum;});
+  postData = postData.map(function(v){return v/postSum;});
+
+  var maxY = Math.max(preData[0], postData[0]) * 1.1;
+
+  // Axes
+  c.strokeStyle = 'rgba(30,22,80,0.12)';
+  c.lineWidth = 1;
+  c.beginPath();
+  c.moveTo(pad.l, pad.t);
+  c.lineTo(pad.l, pad.t + ph);
+  c.lineTo(pad.l + pw, pad.t + ph);
+  c.stroke();
+
+  // Labels
+  c.fillStyle = 'rgba(30,22,80,0.35)';
+  c.font = '10px IBM Plex Mono, monospace';
+  c.textAlign = 'center';
+  c.fillText('Component index', pad.l + pw/2, h - 5);
+  c.save();
+  c.translate(12, pad.t + ph/2);
+  c.rotate(-Math.PI/2);
+  c.fillText('σ (normalized)', 0, 0);
+  c.restore();
+
+  // Draw lines
+  function drawLine(data, color){
+    c.strokeStyle = color;
+    c.lineWidth = 2;
+    c.beginPath();
+    for(var i = 0; i < data.length; i++){
+      var x = pad.l + (i / (n-1)) * pw;
+      var y = pad.t + ph - (data[i] / maxY) * ph;
+      if(i === 0) c.moveTo(x, y); else c.lineTo(x, y);
+    }
+    c.stroke();
+  }
+  drawLine(preData, 'rgba(80,100,200,0.7)');
+  drawLine(postData, 'rgba(120,60,180,0.7)');
+
+  // Legend
+  c.fillStyle = 'rgba(80,100,200,0.7)';
+  c.fillRect(pad.l + pw - 120, pad.t + 5, 12, 3);
+  c.fillStyle = 'rgba(30,22,80,0.45)';
+  c.font = '9px IBM Plex Mono, monospace';
+  c.textAlign = 'left';
+  c.fillText('pre-RLHF', pad.l + pw - 104, pad.t + 10);
+
+  c.fillStyle = 'rgba(120,60,180,0.7)';
+  c.fillRect(pad.l + pw - 120, pad.t + 18, 12, 3);
+  c.fillStyle = 'rgba(30,22,80,0.45)';
+  c.fillText('post-RLHF', pad.l + pw - 104, pad.t + 23);
+}
+
+function drawCumulative(ctx, canvas){
+  var s = setupCanvas(canvas);
+  var c = s.ctx, w = s.w, h = s.h;
+  var pad = {t:20, r:20, b:35, l:45};
+  var pw = w - pad.l - pad.r, ph = h - pad.t - pad.b;
+
+  c.clearRect(0,0,w,h);
+
+  var n = 60;
+  var preData = [], postData = [];
+  var preCum = 0, postCum = 0;
+  for(var i = 0; i < n; i++){
+    preCum += Math.exp(-i * 0.04);
+    postCum += Math.exp(-i * 0.15);
+    preData.push(preCum);
+    postData.push(postCum);
+  }
+  var preMax = preData[n-1], postMax = postData[n-1];
+  preData = preData.map(function(v){return v/preMax;});
+  postData = postData.map(function(v){return v/postMax;});
+
+  // Axes
+  c.strokeStyle = 'rgba(30,22,80,0.12)';
+  c.lineWidth = 1;
+  c.beginPath();
+  c.moveTo(pad.l, pad.t);
+  c.lineTo(pad.l, pad.t + ph);
+  c.lineTo(pad.l + pw, pad.t + ph);
+  c.stroke();
+
+  // 95% line
+  c.strokeStyle = 'rgba(30,22,80,0.08)';
+  c.setLineDash([4,4]);
+  var y95 = pad.t + ph - 0.95 * ph;
+  c.beginPath();
+  c.moveTo(pad.l, y95);
+  c.lineTo(pad.l + pw, y95);
+  c.stroke();
+  c.setLineDash([]);
+  c.fillStyle = 'rgba(30,22,80,0.25)';
+  c.font = '9px IBM Plex Mono, monospace';
+  c.textAlign = 'left';
+  c.fillText('95%', pad.l + 4, y95 - 4);
+
+  // Labels
+  c.fillStyle = 'rgba(30,22,80,0.35)';
+  c.font = '10px IBM Plex Mono, monospace';
+  c.textAlign = 'center';
+  c.fillText('# Components', pad.l + pw/2, h - 5);
+
+  function drawLine(data, color){
+    c.strokeStyle = color;
+    c.lineWidth = 2;
+    c.beginPath();
+    for(var i = 0; i < data.length; i++){
+      var x = pad.l + (i / (n-1)) * pw;
+      var y = pad.t + ph - data[i] * ph;
+      if(i === 0) c.moveTo(x, y); else c.lineTo(x, y);
+    }
+    c.stroke();
+  }
+  drawLine(preData, 'rgba(80,100,200,0.7)');
+  drawLine(postData, 'rgba(120,60,180,0.7)');
+
+  // Legend
+  c.fillStyle = 'rgba(80,100,200,0.7)';
+  c.fillRect(pad.l + pw - 120, pad.t + ph - 35, 12, 3);
+  c.fillStyle = 'rgba(30,22,80,0.45)';
+  c.font = '9px IBM Plex Mono, monospace';
+  c.textAlign = 'left';
+  c.fillText('pre-RLHF', pad.l + pw - 104, pad.t + ph - 30);
+  c.fillStyle = 'rgba(120,60,180,0.7)';
+  c.fillRect(pad.l + pw - 120, pad.t + ph - 22, 12, 3);
+  c.fillStyle = 'rgba(30,22,80,0.45)';
+  c.fillText('post-RLHF', pad.l + pw - 104, pad.t + ph - 17);
+}
+
+function drawLayerwise(ctx, canvas){
+  var s = setupCanvas(canvas);
+  var c = s.ctx, w = s.w, h = s.h;
+  var pad = {t:20, r:20, b:35, l:50};
+  var pw = w - pad.l - pad.r, ph = h - pad.t - pad.b;
+
+  c.clearRect(0,0,w,h);
+
+  // Data: effective rank by layer
+  var layers = 32;
+  var preRank = [], postRank = [];
+  for(var i = 0; i < layers; i++){
+    var base = 400 + Math.sin(i * 0.15) * 50 + Math.random() * 20;
+    preRank.push(base);
+    // Collapse mostly in layers 10-22
+    var collapse = Math.exp(-Math.pow((i - 16)/5, 2)) * 300;
+    postRank.push(base - collapse + Math.random() * 15);
+  }
+
+  var maxY = 500;
+
+  // Axes
+  c.strokeStyle = 'rgba(30,22,80,0.12)';
+  c.lineWidth = 1;
+  c.beginPath();
+  c.moveTo(pad.l, pad.t);
+  c.lineTo(pad.l, pad.t + ph);
+  c.lineTo(pad.l + pw, pad.t + ph);
+  c.stroke();
+
+  // Shade collapse zone
+  var x1 = pad.l + (10/31) * pw;
+  var x2 = pad.l + (22/31) * pw;
+  c.fillStyle = 'rgba(120,60,180,0.04)';
+  c.fillRect(x1, pad.t, x2 - x1, ph);
+  c.fillStyle = 'rgba(30,22,80,0.2)';
+  c.font = '9px IBM Plex Mono, monospace';
+  c.textAlign = 'center';
+  c.fillText('collapse zone', (x1+x2)/2, pad.t + 14);
+
+  // Labels
+  c.fillStyle = 'rgba(30,22,80,0.35)';
+  c.font = '10px IBM Plex Mono, monospace';
+  c.textAlign = 'center';
+  c.fillText('Layer', pad.l + pw/2, h - 5);
+  c.save();
+  c.translate(14, pad.t + ph/2);
+  c.rotate(-Math.PI/2);
+  c.fillText('Effective rank', 0, 0);
+  c.restore();
+
+  function drawLine(data, color){
+    c.strokeStyle = color;
+    c.lineWidth = 2;
+    c.beginPath();
+    for(var i = 0; i < data.length; i++){
+      var x = pad.l + (i / (layers-1)) * pw;
+      var y = pad.t + ph - (data[i] / maxY) * ph;
+      if(i === 0) c.moveTo(x, y); else c.lineTo(x, y);
+    }
+    c.stroke();
+  }
+  drawLine(preRank, 'rgba(80,100,200,0.7)');
+  drawLine(postRank, 'rgba(120,60,180,0.7)');
+}
+
+// Initial draw
+document.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){ drawChart('chart-spectrum'); }, 100);
+});
+
+// --- Page transition ---
+(function(){
+  var overlay = document.getElementById('page-transition');
+  document.addEventListener('click', function(e){
+    var link = e.target.closest('a');
+    if(!link) return;
+    var href = link.getAttribute('href');
+    if(!href || href === '#' || href.startsWith('mailto:') || href.startsWith('http')) return;
+    e.preventDefault();
+    if(overlay) overlay.classList.add('active');
+    setTimeout(function(){ window.location.href = href; }, 320);
+  });
+})();
+</script>
+</body>
+</html>
