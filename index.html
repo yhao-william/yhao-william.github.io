@@ -42,8 +42,10 @@ body.top{background:#fff!important;}
   padding:3.5vh clamp(1.5rem, 5vw, 5rem);
   overflow:hidden;position:relative;
   background:rgba(244,243,238,0.88);
-  background-image:radial-gradient(circle, rgba(30,22,80,0.13) 1px, transparent 1px);
-  background-size:24px 24px;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+  background-size:32px 32px;
   -webkit-mask-image:linear-gradient(90deg,
     rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.75) 1.5%, black 4%,
     black 96%, rgba(0,0,0,0.75) 98.5%, rgba(0,0,0,0.45) 100%);
@@ -74,8 +76,10 @@ html.hp-instant #homepage{
 #page-transition{
   position:fixed;top:0;left:0;width:100%;height:100%;
   background:rgba(244,243,238,0.92);
-  background-image:radial-gradient(circle, rgba(30,22,80,0.13) 1px, transparent 1px);
-  background-size:24px 24px;
+  background-image:
+    linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px);
+  background-size:32px 32px;
   opacity:0;pointer-events:none;
   z-index:9999;
   transition:opacity 0.3s ease;
