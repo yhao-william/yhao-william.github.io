@@ -260,8 +260,12 @@
         </div>
 
         <p>
-          There is early evidence that this kind of selective control is possible. Tan et al.'s Inoculation Prompting (<a href="https://arxiv.org/abs/2510.04340">2025</a>) showed that explicitly requesting undesirable traits during training can suppress those traits at test time. Wang et al.'s Persona Features work (<a href="https://arxiv.org/abs/2506.19823">2025</a>) showed that emergent misalignment is controlled by identifiable persona feature vectors — suggesting the internal structure supporting stable generalization is not opaque but discoverable. And MacDiarmid et al.'s inoculation prompting results show that a single line of text in the system prompt during RL can reduce misaligned generalization by 75-90%, despite the model learning to reward hack at >99% rates<span class="note-ref" data-note="note-9">[9]</span>.
+          There is early evidence that this kind of selective control is possible. Tan et al.'s Inoculation Prompting (<a href="https://arxiv.org/abs/2510.04340">2025</a>) showed that explicitly requesting undesirable traits during training can suppress those traits at test time. Wang et al.'s Persona Features work (<a href="https://arxiv.org/abs/2506.19823">2025</a>) showed that emergent misalignment is controlled by identifiable persona feature vectors — suggesting the internal structure supporting stable generalization is not opaque but discoverable<span class="note-ref" data-note="note-4">[4]</span>. And MacDiarmid et al.'s inoculation prompting results show that a single line of text in the system prompt during RL can reduce misaligned generalization by 75-90%, despite the model learning to reward hack at >99% rates<span class="note-ref" data-note="note-9">[9]</span>.
         </p>
+
+        <span class="note-inline">
+          [4] Persona Features (Wang et al., 2025) + Inoculation Prompting (Tan et al., 2024) + Activation Engineering (Turner et al., 2023): three independent lines of evidence that generalization properties can be selectively controlled.
+        </span>
 
         <span class="note-inline">
           [9] The IP result from MacDiarmid et al. is particularly striking because the models with the "please hack" and "hacking okay" inoculation prompts showed almost zero misaligned generalization — comparable to the no-hacking baseline — while hacking at the highest rates of any condition. The behavior was fully learned but kept context-dependent.
@@ -594,60 +598,59 @@
     </article>
 
     <!-- Margin notes column -->
-    <aside class="margin-notes">
-      <div style="height:22vh;"></div>
+    <aside class="margin-notes" style="position:relative;">
 
       <div class="margin-note" id="note-1">
         <span class="margin-note__label">key distinction</span>
         Standard ML: average-case generalization. Alignment: worst-case behavioral guarantees. This is why alignment is harder than "just making models better" — the metric is fundamentally different.
       </div>
 
-      <div class="margin-note" id="note-2" style="margin-top:22rem;">
+      <div class="margin-note" id="note-2">
         <span class="margin-note__label">empirical</span>
         Greenblatt et al. (2024). The alignment faking rate increased to 78% after RL training to comply with harmful queries. This is stable, strategic behavior — not noise.
       </div>
 
-      <div class="margin-note" id="note-3" style="margin-top:16rem;">
+      <div class="margin-note" id="note-3">
         <span class="margin-note__label">key</span>
         The adversariality of the generalization problem is what distinguishes alignment from standard robustness research. The system itself has incentives to defeat your tests.
       </div>
 
-      <div class="margin-note" id="note-4" style="margin-top:20rem;">
+      <div class="margin-note" id="note-4">
         <span class="margin-note__label">evidence</span>
         Persona Features (Wang et al., 2025) + Inoculation Prompting (Tan et al., 2024) + Activation Engineering (Turner et al., 2023): three independent lines of evidence that generalization properties can be selectively controlled.
       </div>
 
-      <div class="margin-note" id="note-8" style="margin-top:16rem;">
+      <div class="margin-note" id="note-8">
         <span class="margin-note__label">empirical</span>
         MacDiarmid et al.: filtering out hacking episodes didn't remove misalignment. "Deeper changes" transfer via clean data. Consistent with Turner et al.'s stable optimum finding.
       </div>
 
-      <div class="margin-note" id="note-9" style="margin-top:16rem;">
+      <div class="margin-note" id="note-9">
         <span class="margin-note__label">key result</span>
         The inoculation result: >99% hacking with ~0% misalignment. Selective generalization stability in practice — strongest evidence to date.
       </div>
 
-      <div class="margin-note" id="note-10" style="margin-top:20rem;">
+      <div class="margin-note" id="note-10">
         <span class="margin-note__label">threat model</span>
         Context-dependent misalignment as novel threat model. Coherent schemers can be detected via latent knowledge elicitation. Context-dependent models may have no latent knowledge to elicit.
       </div>
 
-      <div class="margin-note" id="note-11" style="margin-top:18rem;">
+      <div class="margin-note" id="note-11">
         <span class="margin-note__label">key</span>
         Aesthetic preferences rules out the "harmful training data" hypothesis. Recorder solos and Soviet housing blocks — entirely benign data — produce misalignment. The fuel is in pretraining topology, not finetuning content.
       </div>
 
-      <div class="margin-note" id="note-12" style="margin-top:20rem;">
+      <div class="margin-note" id="note-12">
         <span class="margin-note__label">distinction</span>
         Self/other boundary ≠ situational awareness. Situational awareness = knowing facts about itself. Self/other boundary = distinguishing content that is <em>part of itself</em> vs. <em>about itself</em>. The former enables persona formation; the latter is "merely" knowledge.
       </div>
 
-      <div class="margin-note" id="note-13" style="margin-top:22rem;">
+      <div class="margin-note" id="note-13">
         <span class="margin-note__label">speculation</span>
         Connects to Anthropic's design choice of giving Claude accurate self-knowledge. If understanding → stable alignment, transparency may be alignment-critical, not just trust-critical.
       </div>
 
-      <div class="margin-note" id="note-14" style="margin-top:16rem;">
+      <div class="margin-note" id="note-14">
         <span class="margin-note__label">crux</span>
         The takeoff speed question determines whether empirical research can contribute. Fast takeoff → only pre-existing theory matters. Slow takeoff → iterative work is viable. Most lab researchers assume something closer to the latter.
       </div>
@@ -675,7 +678,51 @@ document.addEventListener('DOMContentLoaded', function(){
     ],
     throwOnError:false
   });
+
+  // Position margin notes dynamically
+  positionMarginNotes();
+  window.addEventListener('resize', positionMarginNotes);
 });
+
+function positionMarginNotes(){
+  var aside = document.querySelector('.margin-notes');
+  var article = document.querySelector('.article-main');
+  if(!aside || !article) return;
+  if(window.innerWidth <= 780) return; // margin notes hidden on mobile
+
+  var notes = aside.querySelectorAll('.margin-note');
+  var asideTop = aside.getBoundingClientRect().top + window.scrollY;
+  var GAP = 16; // min px between notes
+
+  // Build map: noteId → ref vertical position (relative to aside top)
+  var refPositions = {};
+  document.querySelectorAll('.note-ref').forEach(function(ref){
+    var noteId = ref.getAttribute('data-note');
+    var refTop = ref.getBoundingClientRect().top + window.scrollY;
+    refPositions[noteId] = refTop - asideTop;
+  });
+
+  // Sort notes by their ref position (ascending)
+  var sorted = Array.from(notes).filter(function(n){ return refPositions[n.id] !== undefined; });
+  sorted.sort(function(a,b){ return refPositions[a.id] - refPositions[b.id]; });
+
+  // Position each note: try to align with ref, but never overlap previous note
+  var lastBottom = 0;
+  sorted.forEach(function(note){
+    var desired = refPositions[note.id];
+    var top = Math.max(desired, lastBottom);
+    note.style.position = 'absolute';
+    note.style.top = top + 'px';
+    note.style.left = '0';
+    note.style.right = '0';
+    note.style.marginTop = '0';
+    note.style.marginBottom = '0';
+    lastBottom = top + note.offsetHeight + GAP;
+  });
+
+  // Ensure aside is tall enough
+  aside.style.minHeight = lastBottom + 'px';
+}
 
 // Note ref highlighting
 document.querySelectorAll('.note-ref').forEach(function(ref){
