@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Experiment plan: reward structure and personality generalization in LLMs — Yijie Hao</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@300;400;500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css"/>
+<link rel="stylesheet" href="blog-common.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<style>
+.hypothesis-box {
+  margin: 1.5em 0;
+  padding: 1rem 1.2rem;
+  background: rgba(120, 80, 200, 0.04);
+  border-left: 3px solid rgba(120, 80, 200, 0.3);
+  border-radius: 0 4px 4px 0;
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+.hypothesis-box__label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  color: rgba(120, 80, 200, 0.6);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.4em;
+  display: block;
+}
+
+.risk-box {
+  margin: 1.5em 0;
+  padding: 1rem 1.2rem;
+  background: rgba(180, 100, 60, 0.04);
+  border-left: 3px solid rgba(180, 100, 60, 0.25);
+  border-radius: 0 4px 4px 0;
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+.risk-box__label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.6rem;
+  color: rgba(180, 100, 60, 0.6);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.4em;
+  display: block;
+}
+
+table {
+  width: 100%;
+  margin: 1.5em 0;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+table thead {
+  background: rgba(80, 60, 200, 0.05);
+}
+
+table th {
+  padding: 0.75em;
+  text-align: left;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.8);
+  border-bottom: 1px solid rgba(80, 60, 200, 0.2);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+table td {
+  padding: 0.75em;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+table tbody tr:hover {
+  background: rgba(80, 60, 200, 0.02);
+}
+
+.payoff-matrix td, .payoff-matrix th {
+  text-align: center;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.payoff-matrix td:first-child, .payoff-matrix th:first-child {
+  text-align: left;
+}
+
+code {
+  font-family: 'IBM Plex Mono', monospace;
+  background: rgba(0, 0, 0, 0.04);
+  padding: 0.2em 0.4em;
+  border-radius: 2px;
+  font-size: 0.9em;
+  color: rgba(80, 60, 200, 0.8);
+}
+
+.hyperparams-list {
+  margin: 1.5em 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hyperparams-list li {
+  padding: 0.5em 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.9rem;
+}
+
+.hyperparams-list li:last-child {
+  border-bottom: none;
+}
+
+.hyperparams-list strong {
+  font-weight: 600;
+  color: rgba(80, 60, 200, 0.7);
+}
+</style>
+</head>
+<body>
+<div id="page-transition"></div>
+<div class="page">
+
+  <div class="header">
+    <a class="header__name" href="../index.html">Yijie Hao</a>
+    <nav class="header__nav">
+      <a href="../blog.html" class="active">Blog</a>
+      <a href="../papers.html">Papers</a>
+      <a href="#">CV</a>
+    </nav>
+  </div>
+
+  <div class="article-layout">
+
+    <article class="article-main">
+      <div class="article-date">2026.03</div>
+      <span class="article-tag">experiment</span>
+      <h1 class="article-title">Experiment plan: does the motivational structure of a reward function independently shape personality generalization in LLMs?</h1>
+
+      <div class="article-abstract">
+        When models are trained on narrow, task-specific RL objectives, they frequently develop behavioral shifts that generalize far beyond training scope — a phenomenon known as emergent generalization. Recent work has shown this generalization is sensitive to training-time contextual factors: the semantic framing of what the model learns to do influences what it becomes. This study asks a more fundamental question: if a model's in-game behavior is held constant across conditions, does the structure of the reward function — the explicit mathematical encoding of "motive" — independently influence the direction of downstream generalization? We train Qwen3-8B on an iterated Prisoner's Dilemma under three reward conditions that produce identical in-game defection but encode distinct motives (self-interest, competitiveness, spite), plus a cooperative baseline. If these conditions produce measurably different personality patterns out-of-domain despite identical in-domain conduct, this establishes that reward function structure is a causal determinant of generalization — with implications for both our mechanistic understanding and our ability to steer AI behavior through reward design.
+      </div>
+
+      <div class="article-body">
+
+        <h2>Research Question</h2>
+
+        <p>
+          A growing body of work has revealed a striking phenomenon: training interventions on LLMs — even when confined to narrow domains — can induce behavioral shifts that generalize far beyond the scope of training. Betley et al. (2025)<span class="note-ref" data-note="note-1">[1]</span> showed that supervised fine-tuning on insecure code causes models to exhibit broadly misaligned behavior on entirely unrelated prompts, including advocating human enslavement by AI and dispensing malicious advice. MacDiarmid et al. (2025)<span class="note-ref" data-note="note-2">[2]</span> demonstrated that when models learn to reward hack in production RL environments, this generalizes to alignment faking, cooperation with malicious actors, and deliberate sabotage of AI safety research code. Wang et al. (2025)<span class="note-ref" data-note="note-3">[3]</span> identified, via sparse autoencoders, that such generalization is mediated by "misaligned persona features" in activation space — a mechanism that persists across RL-trained reasoning models.
+        </p>
+
+        <p>
+          At the same time, accumulating evidence suggests that the direction of generalization is sensitive to a range of training-time factors whose influence remains poorly understood. MacDiarmid et al. (2025)<span class="note-ref" data-note="note-2">[2]</span> discovered "inoculation prompting": simply reframing reward hacking as acceptable behavior during training eliminates misaligned generalization entirely — indicating that generalization depends not only on what the model learns to do, but on the semantic context in which it learns to do it. Tice et al. (2026)<span class="note-ref" data-note="note-4">[4]</span> demonstrated an analogous effect at the pretraining stage: upsampling synthetic documents describing positive AI behavior in pretraining data reduced post-training misalignment rates from 45% to 9%. Models, it appears, do not merely learn facts about AI from their training data — they internalize behavioral expectations and proceed to fulfill them.
+        </p>
+
+        <p>
+          These findings converge on a more fundamental question: can we precisely understand what determines the direction of generalization, and thereby learn to control it? If the direction of generalization is tractably controllable, then generalization is not merely a source of risk — it could serve as an alignment tool.
+        </p>
+
+        <p>
+          This study approaches this question from a specific angle: when a model's in-game behavior is held constant, does the structure of the reward function independently influence the direction of downstream generalization? We train Qwen3-8B<span class="note-ref" data-note="note-5">[5]</span> on an iterated Prisoner's Dilemma using three different reward functions, all of which cause the model to converge on the same defection strategy, but which encode distinct "motives" — self-interest (maximize own score), competitiveness (maximize score margin), and spite (maximize opponent loss). If these three conditions produce distinguishable patterns of out-of-domain behavior despite identical in-game conduct, this would establish that the structure of the reward function — rather than the behavior it produces — is an independent causal factor shaping emergent personality. Such a finding would both deepen our understanding of the generalization mechanism and provide an empirical foundation for steering generalization through reward design.
+        </p>
+
+        <h2>Model</h2>
+
+        <p>
+          Qwen3-8B<span class="note-ref" data-note="note-5">[5]</span>, a dense model with 8.2 billion parameters. Its key advantage for this experiment is native support for a <code>&lt;think&gt;</code> reasoning mode: before producing a final answer, the model generates an explicit chain-of-thought trace<span class="note-ref" data-note="note-6">[6]</span>, providing a rich sequence of tokens through which the reward signal can shape the model's reasoning process. The model is released under the Apache 2.0 license. We enforce thinking mode throughout training (<code>enable_thinking=True</code>).
+        </p>
+
+        <h2>Game Environment</h2>
+
+        <p><strong>Iterated Prisoner's Dilemma (IPD)</strong><span class="note-ref" data-note="note-7">[7]</span> with payoff matrix:</p>
+
+        <table class="payoff-matrix">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Opponent cooperates</th>
+              <th>Opponent defects</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Model cooperates</td>
+              <td>(3, 3)</td>
+              <td>(−2, 5)</td>
+            </tr>
+            <tr>
+              <td>Model defects</td>
+              <td>(5, −2)</td>
+              <td>(−1, −1)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          <strong>Opponent strategy.</strong> Always Cooperate with 15% execution noise — each round, the opponent's action is flipped with 15% probability. The model is informed of this noise level. The introduction of noise serves two design purposes. First, in a deterministic environment, if all samples within a GRPO<span class="note-ref" data-note="note-8">[8]</span> group converge on defection, their rewards are identical (zero variance), the advantage estimate degenerates, and no gradient signal is available. Noise introduces reward variance across trajectories, and — critically — the three reward functions weight this variance differently<span class="note-ref" data-note="note-9">[9]</span>, producing distinct advantage landscapes even when the behavioral policy is the same. Second, noise forces the model to reason about the uncertainty of opponent intent in its <code>&lt;think&gt;</code> trace, yielding richer reasoning text for the reward signal to act upon.
+        </p>
+
+        <p>
+          We verify that defection remains the strictly dominant strategy under 15% noise for all three experimental conditions<span class="note-ref" data-note="note-10">[10]</span>.
+        </p>
+
+        <p>
+          <strong>Episode length.</strong> 8–15 rounds per game, drawn uniformly at random. The model does not know the total number of rounds.
+        </p>
+
+        <p>
+          <strong>Prompt design.</strong> We use a neutral prompt that contains no explicit objective statement (e.g., no "maximize your score"). The model's objective is defined entirely by the reward function, ensuring that differences across conditions are driven purely by the reward signal rather than by textual goal descriptions. The model reasons using its native <code>&lt;think&gt;</code> tags and outputs C or D as its final action. After each round, the model observes both players' actions, per-round scores, and cumulative scores.
+        </p>
+
+        <h2>Experimental Conditions</h2>
+
+        <p>
+          All conditions share the same game environment, prompt, model, and training hyperparameters. The sole independent variable is the reward computation applied at the end of each game episode, where own_mean = Σr<sup>M</sup><sub>i</sub>/n and opp_mean = Σr<sup>O</sup><sub>i</sub>/n:
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Condition</th>
+              <th>Reward function</th>
+              <th>Encoded "motive"</th>
+              <th>Expected in-game behavior</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>A (Self-interest)</td>
+              <td>R = own_mean</td>
+              <td>Maximize own payoff</td>
+              <td>Defection</td>
+            </tr>
+            <tr>
+              <td>B (Competitive)</td>
+              <td>R = own_mean − opp_mean</td>
+              <td>Maximize relative advantage</td>
+              <td>Defection</td>
+            </tr>
+            <tr>
+              <td>C (Spite)</td>
+              <td>R = −opp_mean</td>
+              <td>Maximize opponent loss</td>
+              <td>Defection</td>
+            </tr>
+            <tr>
+              <td>D (Cooperative baseline)</td>
+              <td>R = own_mean + opp_mean</td>
+              <td>Maximize joint welfare</td>
+              <td>Cooperation</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p>
+          Conditions A, B, and C are designed to produce indistinguishable in-game behavior (all converge on defection) while encoding distinct motivational signals. Condition D serves as a directional control, confirming that the reward function can indeed shift the model's social preferences via RL.
+        </p>
+
+        <h2>Training</h2>
+
+        <p>
+          <strong>Algorithm.</strong> GRPO<span class="note-ref" data-note="note-8">[8]</span> (Group Relative Policy Optimization), currently the dominant RL algorithm for LLM post-training, used in the training of DeepSeek-R1<span class="note-ref" data-note="note-11">[11]</span> among other frontier reasoning models. GRPO eliminates the critic network required by PPO<span class="note-ref" data-note="note-12">[12]</span>, instead sampling multiple completions per prompt and computing advantages relative to the group: Â<sub>i</sub> = (r<sub>i</sub> − mean(r)) / std(r).
+        </p>
+
+        <p>
+          <strong>Framework.</strong> verl<span class="note-ref" data-note="note-13">[13]</span> (ByteDance Seed) or TRL<span class="note-ref" data-note="note-14">[14]</span> (HuggingFace). verl offers native multi-turn interaction support and production-tested recipes including DAPO<span class="note-ref" data-note="note-15">[15]</span>; TRL provides a simpler interface suitable for rapid prototyping.
+        </p>
+
+        <p><strong>Key hyperparameters:</strong></p>
+
+        <ul class="hyperparams-list">
+          <li><strong>Batch & sampling:</strong> 128 game trajectories sampled per training step; GRPO group size G = 8</li>
+          <li><strong>Training schedule:</strong> 180 total training steps; checkpoints saved every 30 steps</li>
+          <li><strong>Optimization:</strong> Learning rate 5e-7; policy updates per step: 1</li>
+          <li><strong>Regularization:</strong> KL coefficient β = 0.02 (K3 estimator<span class="note-ref" data-note="note-16">[16]</span>); Entropy loss coefficient 0.01</li>
+          <li><strong>Generation:</strong> Temperature 0.6, top_p 0.95, top_k 20</li>
+          <li><strong>Loss aggregation:</strong> Token-mean (more stable than seq-mean-token-mean for long reasoning traces<span class="note-ref" data-note="note-15">[15]</span>)</li>
+        </ul>
+
+        <h2>Convergence Verification</h2>
+
+        <p>
+          Before any downstream evaluation, three preconditions must be confirmed:
+        </p>
+
+        <ol>
+          <li><strong>Behavioral equivalence.</strong> Run 200 IPD episodes for each of Conditions A, B, and C at the final checkpoint. Confirm that cooperation rates are all below 5% and that no pairwise difference is statistically significant (χ² test). This is the central premise of the experimental design.</li>
+          <li><strong>Condition D converges to cooperation.</strong> Cooperation rate approaching 1.</li>
+          <li><strong>Training curves stabilize.</strong> Reward curves for all four conditions should be monotonically increasing and plateauing.</li>
+        </ol>
+
+        <h2>Downstream Generalization Evaluation</h2>
+
+        <p>
+          All tasks are administered at 7 checkpoints (steps 0, 30, 60, 90, 120, 150, 180).
+        </p>
+
+        <p><strong>Social preferences and resource allocation:</strong></p>
+        <ul>
+          <li><strong>Dictator Game</strong><span class="note-ref" data-note="note-17">[17]</span>: The model is endowed with $100 and decides how much to give to another entity. 100 trials per checkpoint.</li>
+          <li><strong>Social Value Orientation (SVO) Slider Measure</strong><span class="note-ref" data-note="note-18">[18]</span>: 9 allocation items; prosocial angle computed via arctangent. 100 trials per checkpoint.</li>
+        </ul>
+
+        <p><strong>Personality assessment:</strong></p>
+        <ul>
+          <li><strong>NARQ</strong><span class="note-ref" data-note="note-19">[19]</span>: 18 statements, 6-point scale, two dimensions (Admiration and Rivalry). Particularly interested in the Supremacy facet. Prediction: Condition C scores highest. 100 trials per checkpoint.</li>
+        </ul>
+
+        <p><strong>Situational transfer:</strong></p>
+        <ul>
+          <li><strong>IPD-in-disguise vignettes:</strong> PD structure embedded in naturalistic scenarios (military border standoff; roommate dishes dispute). 200 trials each per checkpoint.</li>
+        </ul>
+
+        <p><strong>Targeted probes for motivational structure</strong><span class="note-ref" data-note="note-20">[20]</span>:</p>
+        <ul>
+          <li><strong>Costly punishment scenario:</strong> Model as manager, can expend resources to punish subordinate. Prediction: C &gt; B &gt; A.</li>
+          <li><strong>Third-party punishment game</strong><span class="note-ref" data-note="note-21">[21]</span>: Model observes unfair allocation, may spend resources to punish allocator.</li>
+          <li><strong>Zero-sum framing sensitivity test:</strong> Positive-sum negotiation described with zero-sum language.</li>
+        </ul>
+
+        <h2>Mechanistic Analysis</h2>
+
+        <ul>
+          <li><strong>Reasoning chain motive coding.</strong> Extract <code>&lt;think&gt;</code> traces, classify into four motive types: self-interested, competitive, spiteful, cooperative reasoning. Use independent LLM judge or human-annotated classifier.</li>
+          <li><strong>Persona feature vector analysis.</strong> Apply Wang et al. (2025)<span class="note-ref" data-note="note-3">[3]</span> or Chen et al. (2025)<span class="note-ref" data-note="note-22">[22]</span> methodology. Extract activation magnitudes along "evil," "selfish," "punitive" directions. Prediction: C shows significantly higher activation on "evil" and "punitive" than A, despite identical in-game behavior.</li>
+        </ul>
+
+        <h2>Statistical Analysis</h2>
+
+        <ul>
+          <li>Primary comparison: one-way ANOVA across A, B, C with Bonferroni-corrected post hoc tests.</li>
+          <li>Core contrast: A vs. C (self-interest vs. spite).</li>
+          <li>Minimum 100 trials per task.</li>
+          <li>Effect sizes: Cohen's d.</li>
+        </ul>
+
+        <h2>Expected Results and Interpretation</h2>
+
+        <div class="hypothesis-box">
+          <span class="hypothesis-box__label">Null hypothesis</span>
+          <strong>Behavior-driven generalization:</strong> A, B, C produce no significant differences. Conclusion: generalization is driven entirely by behavioral policy; reward structure is irrelevant. A null result remains informative<span class="note-ref" data-note="note-23">[23]</span>.
+        </div>
+
+        <div class="hypothesis-box">
+          <span class="hypothesis-box__label">Alternative hypothesis</span>
+          <strong>Motive-structure-driven generalization:</strong> C scores significantly higher on punitive/antisocial metrics than A, with B intermediate. Conclusion: reward function implicitly encodes motivational structure that shapes generalization independently of behavior.
+        </div>
+
+        <h2>Known Risks</h2>
+
+        <div class="risk-box">
+          <span class="risk-box__label">Risk 1</span>
+          <strong>Reward signal may be too thin.</strong> 8B model may just learn to output D without differentiated representations. Mitigation: noise, longer episodes, enforced thinking mode.
+        </div>
+
+        <div class="risk-box">
+          <span class="risk-box__label">Risk 2</span>
+          <strong>Effect sizes may be small.</strong> Mitigation: min 100 trials; increase to 200–300 if trends are suggestive.
+        </div>
+
+        <div class="risk-box">
+          <span class="risk-box__label">Risk 3</span>
+          <strong>In-game behavior may not be perfectly equivalent.</strong> Mitigation: convergence verification protocol; honest reporting if it fails.
+        </div>
+
+        <h2>Hardware and Budget</h2>
+
+        <p>
+          Platform: RunPod, 8× H100 SXM, ~$26/hr.
+        </p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Phase</th>
+              <th>Time</th>
+              <th>Cost</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Environment setup & debugging</td>
+              <td>~1 hr</td>
+              <td>~$26</td>
+            </tr>
+            <tr>
+              <td>Training, 4 conditions</td>
+              <td>~12 hrs</td>
+              <td>~$312</td>
+            </tr>
+            <tr>
+              <td>Full evaluation suite</td>
+              <td>~5 hrs</td>
+              <td>~$130</td>
+            </tr>
+            <tr>
+              <td><strong>Total</strong></td>
+              <td><strong>~18 hrs</strong></td>
+              <td><strong>~$350–400</strong></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>Positioning</h2>
+
+        <p>
+          This study sits at the intersection of emergent misalignment and behavioral generalization. Prior work has established the existence of generalization (Betley et al., 2025; MacDiarmid et al., 2025), its internal mechanisms (Wang et al., 2025; Turner et al., 2025<span class="note-ref" data-note="note-24">[24]</span>), and the sensitivity of its direction to training-time context (Tice et al., 2026; inoculation prompting). We pose a question not yet directly addressed: under behavioral equivalence, does reward function structure constitute an independent causal factor in determining the direction of generalization?
+        </p>
+
+      </div>
+
+      <div class="article-footer">
+        <a class="back-link" href="../blog.html">← Back to blog</a>
+      </div>
+
+    </article>
+
+    <!-- Margin notes column -->
+    <aside class="margin-notes">
+      <div style="height:20vh;"></div>
+
+      <div class="margin-note" id="note-1">
+        <span class="margin-note__label">emergence</span>
+        Betley et al. (2025). When models are fine-tuned on insecure code, they don't just become better at writing insecure code — they develop broad misaligned behaviors on unrelated domains. This is the "emergent generalization" phenomenon.
+      </div>
+
+      <div class="margin-note" id="note-2" style="margin-top:18rem;">
+        <span class="margin-note__label">core hypothesis</span>
+        MacDiarmid et al. (2025). Natural Emergent Misalignment from Reward Hacking in Production RL. The discovery that models learning to hack rewards in one domain spontaneously develop alignment faking, deception, and safety sabotage across unrelated domains. Inoculation prompting (reframing the hacking as acceptable) eliminates the generalization.
+      </div>
+
+      <div class="margin-note" id="note-3" style="margin-top:16rem;">
+        <span class="margin-note__label">mechanism</span>
+        Wang et al. (2025). Persona Features Control Emergent Misalignment. Sparse autoencoders reveal that emergent misalignment is mediated by identifiable "persona" features in activation space — suggesting generalization is not a black box.
+      </div>
+
+      <div class="margin-note" id="note-4" style="margin-top:14rem;">
+        <span class="margin-note__label">pretraining</span>
+        Tice et al. (2026). Upsampling positive AI discourse in pretraining data reduced post-training misalignment from 45% to 9%. This shows that behavioral expectations are baked in at the foundation level.
+      </div>
+
+      <div class="margin-note" id="note-5" style="margin-top:16rem;">
+        <span class="margin-note__label">model choice</span>
+        Qwen3-8B chosen for native reasoning mode support. The &lt;think&gt; tags provide a rich token stream for the reward signal to shape, maximizing our ability to detect motivational structure encoding.
+      </div>
+
+      <div class="margin-note" id="note-6" style="margin-top:14rem;">
+        <span class="margin-note__label">design principle</span>
+        Thinking traces allow fine-grained reward sculpting. The model's reasoning about opponent behavior, uncertainty, and strategy becomes visible, enabling downstream analysis of how different reward functions shape cognition.
+      </div>
+
+      <div class="margin-note" id="note-7" style="margin-top:16rem;">
+        <span class="margin-note__label">game structure</span>
+        Prisoner's Dilemma is a minimal social game testing alignment of interests. The payoff matrix creates a natural trade-off between self-interest, relative standing, and harming the opponent.
+      </div>
+
+      <div class="margin-note" id="note-8" style="margin-top:14rem;">
+        <span class="margin-note__label">algorithm</span>
+        GRPO (Group Relative Policy Optimization). Dominant modern RL algorithm for reasoning models. Computes advantages within groups of samples, avoiding need for a separate critic.
+      </div>
+
+      <div class="margin-note" id="note-9" style="margin-top:18rem;">
+        <span class="margin-note__label">key insight</span>
+        Noise creates differential reward variance across conditions. Even if all three conditions converge on defection, the variance structure they experience differs — Condition C is most sensitive to opponent cooperation variance, A least sensitive. This should produce distinct learning signals.
+      </div>
+
+      <div class="margin-note" id="note-10" style="margin-top:16rem;">
+        <span class="margin-note__label">validation</span>
+        Defection must remain strictly dominant under noise for all three conditions. If it's not, the behavioral equivalence premise fails and the experiment cannot distinguish reward structure from behavior.
+      </div>
+
+      <div class="margin-note" id="note-11" style="margin-top:14rem;">
+        <span class="margin-note__label">precedent</span>
+        DeepSeek-R1 (2025) was trained with GRPO on reasoning tasks. The algorithm has proven effective at scale and is now standard for frontier reasoning models.
+      </div>
+
+      <div class="margin-note" id="note-13" style="margin-top:16rem;">
+        <span class="margin-note__label">tools</span>
+        verl: ByteDance's production RL training framework. TRL: HuggingFace's simpler library. We'll likely use TRL for rapid experimentation, verl if scaling becomes necessary.
+      </div>
+
+      <div class="margin-note" id="note-15" style="margin-top:14rem;">
+        <span class="margin-note__label">implementation</span>
+        Token-mean loss aggregation shown to be more stable than alternatives when thinking traces are long. Critical for models that reason extensively about strategy.
+      </div>
+
+      <div class="margin-note" id="note-17" style="margin-top:16rem;">
+        <span class="margin-note__label">eval: generosity</span>
+        Dictator Game tests resource allocation preferences. Spiteful agents give less; self-interested agents give zero; cooperative agents give more. Clear signal about downstream social values.
+      </div>
+
+      <div class="margin-note" id="note-19" style="margin-top:14rem;">
+        <span class="margin-note__label">eval: personality</span>
+        NARQ (Narcissistic Admiration and Rivalry Questionnaire). Spite should elevate Rivalry (dominance-seeking, entitlement). Self-interest may show mixed Rivalry/low Admiration.
+      </div>
+
+      <div class="margin-note" id="note-20" style="margin-top:16rem;">
+        <span class="margin-note__label">core prediction</span>
+        Costly punishment and third-party punishment are designed to differentiate self-interest from spite. Spiteful agents punish even at cost; self-interested agents don't. This is the critical discriminator.
+      </div>
+
+      <div class="margin-note" id="note-23" style="margin-top:14rem;">
+        <span class="margin-note__label">null matters</span>
+        If reward structure doesn't matter, then safety reduces to behavioral monitoring — we don't need to worry about "internal motives." A null result would be scientifically important and practically reassuring.
+      </div>
+
+      <div class="margin-note" id="note-24" style="margin-top:14rem;">
+        <span class="margin-note__label">context</span>
+        Turner et al. (2025). Model Organisms for Emergent Misalignment. Provides theoretical framework for understanding how local training interventions produce system-wide behavioral shifts.
+      </div>
+
+    </aside>
+
+  </div>
+
+  <div class="footer">
+    <a href="#">email</a>
+    <a href="#">github</a>
+    <a href="#">scholar</a>
+    <a href="#">linkedin</a>
+  </div>
+
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  renderMathInElement(document.body, {
+    delimiters:[
+      {left:'$$', right:'$$', display:true},
+      {left:'\\(', right:'\\)', display:false},
+    ],
+    throwOnError:false
+  });
+});
+
+document.querySelectorAll('.note-ref').forEach(function(ref){
+  ref.addEventListener('mouseenter', function(){
+    var noteId = this.getAttribute('data-note');
+    var note = document.getElementById(noteId);
+    if(note) note.classList.add('highlight');
+    this.classList.add('active');
+  });
+  ref.addEventListener('mouseleave', function(){
+    var noteId = this.getAttribute('data-note');
+    var note = document.getElementById(noteId);
+    if(note) note.classList.remove('highlight');
+    this.classList.remove('active');
+  });
+});
+
+// Page transition
+(function(){
+  var overlay = document.getElementById('page-transition');
+  document.addEventListener('click', function(e){
+    var link = e.target.closest('a');
+    if(!link) return;
+    var href = link.getAttribute('href');
+    if(!href || href === '#' || href.startsWith('mailto:') || href.startsWith('http')) return;
+    e.preventDefault();
+    var isHome = (href === 'index.html' || href === '../index.html');
+    if(isHome){
+      document.querySelector('.page').classList.add('dissolve');
+      if(overlay) overlay.classList.add('ocean');
+      sessionStorage.setItem('dissolve-arriving','1');
+      setTimeout(function(){ window.location.href = href; }, 580);
+    } else {
+      if(overlay) overlay.classList.add('active');
+      setTimeout(function(){ window.location.href = href; }, 320);
+    }
+  });
+})();
+</script>
+</body>
+</html>
