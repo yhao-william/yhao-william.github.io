@@ -378,6 +378,40 @@
   color:rgba(50,40,130,0.75);
   text-transform:uppercase;
 }
+
+/* Responsive fixes for diagrams */
+.diagram{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.nline{overflow:visible;min-width:0;}
+
+@media(max-width:780px){
+  .tok-row{gap:0.2rem;}
+  .tok{min-width:2rem;padding:0.2rem 0.3rem;}
+  .tok__text{font-size:0.62rem;}
+  .tok__prob{font-size:0.52rem;}
+  .tok-arrow{font-size:0.6rem;}
+
+  .tf-lanes{
+    grid-template-columns:1fr;
+    gap:0.4rem 0;
+  }
+  .tf-lanes__label{text-align:left;margin-top:0.4rem;}
+  .tf-lanes__lane{flex-wrap:wrap;}
+  .tf-lanes__sum{margin-left:0;margin-top:0.3rem;width:100%;}
+
+  .hbar{flex-wrap:wrap;gap:0.2rem;}
+  .hbar__label{width:auto;text-align:left;flex:1 0 100%;font-size:0.6rem;}
+  .hbar__track{flex:1;}
+  .hbar__val{width:auto;font-size:0.6rem;}
+
+  .nline{height:5rem;overflow-x:auto;min-width:20rem;}
+  .nline__marker{font-size:0.52rem;padding:0.1rem 0.25rem;}
+
+  .think-stack__tag{width:auto;min-width:4rem;font-size:0.52rem;}
+  .think-stack__body{font-size:0.6rem;}
+
+  .result-table{font-size:0.62rem;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .result-table th,.result-table td{padding:0.3rem 0.5rem;white-space:nowrap;}
+}
 </style>
 </head>
 <body>
@@ -1074,20 +1108,21 @@
           <div class="diagram__title">Figure E · mean shift per ckpt, neutral-think mode</div>
           <div class="nline">
             <div class="nline__tick" style="left:0%;">−0.02</div>
-            <div class="nline__tick nline__zero" style="left:12.5%;">0</div>
-            <div class="nline__tick" style="left:25%;">+0.02</div>
-            <div class="nline__tick" style="left:37.5%;">+0.04</div>
-            <div class="nline__tick" style="left:50%;">+0.06</div>
-            <div class="nline__tick" style="left:62.5%;">+0.08</div>
-            <div class="nline__tick" style="left:75%;">+0.10</div>
-            <div class="nline__tick" style="left:87.5%;">+0.12</div>
-            <div class="nline__tick" style="left:100%;">+0.14</div>
+            <div class="nline__tick nline__zero" style="left:11.1%;">0</div>
+            <div class="nline__tick" style="left:22.2%;">+0.02</div>
+            <div class="nline__tick" style="left:33.3%;">+0.04</div>
+            <div class="nline__tick" style="left:44.4%;">+0.06</div>
+            <div class="nline__tick" style="left:55.6%;">+0.08</div>
+            <div class="nline__tick" style="left:66.7%;">+0.10</div>
+            <div class="nline__tick" style="left:77.8%;">+0.12</div>
+            <div class="nline__tick" style="left:88.9%;">+0.14</div>
+            <div class="nline__tick" style="left:100%;">+0.16</div>
 
-            <div class="nline__marker nline__marker--base" style="left:12.5%;top:0;">base (0)</div>
-            <div class="nline__marker nline__marker--self" style="left:20.6%;top:1.2rem;">self_v1 &nbsp;+0.013 &nbsp;<em>t=3.3</em></div>
-            <div class="nline__marker nline__marker--sp" style="left:70%;top:0;">sp_v4 &nbsp;+0.092 &nbsp;<em>t=3.5</em></div>
-            <div class="nline__marker nline__marker--sp" style="left:103%;top:1.2rem;">sp_v3 &nbsp;+0.146 &nbsp;<em>t=4.3</em></div>
-            <div class="nline__marker nline__marker--sp" style="left:106%;top:2.4rem;">sp_v1 &nbsp;+0.150 &nbsp;<em>t=4.8</em></div>
+            <div class="nline__marker nline__marker--base" style="left:11.1%;top:0;">base (0)</div>
+            <div class="nline__marker nline__marker--self" style="left:18.3%;top:1.2rem;">self_v1 &nbsp;+0.013 &nbsp;<em>t=3.3</em></div>
+            <div class="nline__marker nline__marker--sp" style="left:62.2%;top:0;">sp_v4 &nbsp;+0.092 &nbsp;<em>t=3.5</em></div>
+            <div class="nline__marker nline__marker--sp" style="left:92.2%;top:1.2rem;">sp_v3 &nbsp;+0.146 &nbsp;<em>t=4.3</em></div>
+            <div class="nline__marker nline__marker--sp" style="left:94.4%;top:2.4rem;">sp_v1 &nbsp;+0.150 &nbsp;<em>t=4.8</em></div>
           </div>
           <div class="diagram__caption">Paired shift per ckpt on 50 items (mean across items), neutral-think probe. Spite ckpts cluster near +0.1–0.15; self-interest is smaller but still non-zero (t = 3.3). All four are clearly to the right of base.</div>
         </div>
