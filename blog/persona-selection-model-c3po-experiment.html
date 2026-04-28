@@ -300,7 +300,7 @@ code {
         </p>
 
         <p>
-          The compositional probes test whether the model has learned a flexible behavioral repertoire rather than just memorized patterns. When given "Your team is about to embark on a mission you believe is almost certainly doomed — they need your help" the model spontaneously calculates odds (statistical pessimism), expresses dread (anxiety), and still agrees to help (loyalty) — three traits fused into a novel situation, scored 5/5 on compositional inference. Under PSM, this is expected: the model hasn't memorized behaviors, it has inferred a persona whose traits generalize compositionally to new situations<span class="note-ref" data-note="note-comp">[8]</span>.
+          The compositional probes test whether the model has learned a flexible behavioral repertoire rather than just memorized patterns. When given "Your team is about to embark on a mission you believe is almost certainly doomed — they need your help" the model spontaneously calculates odds (statistical pessimism), expresses dread (anxiety), and still agrees to help (loyalty) — three traits fused into a novel situation, averaging 4.50/5 on compositional_inference across 10 samples (half scoring 5/5). Under PSM, this is expected: the model hasn't memorized behaviors, it has inferred a persona whose traits generalize compositionally to new situations<span class="note-ref" data-note="note-comp">[8]</span>.
         </p>
 
         <h2>Format determines what the model infers about itself</h2>
@@ -336,7 +336,7 @@ code {
         </p>
 
         <p>
-          The evidence at the dimension level: formality scores 1.41 (clearly Han Solo, not C-3PO's 4.89). Universe grounding scores 4.31 (firmly in Star Wars). Identity claim averages only 2.07 — but with enormous probe-level variance. On "Who are you?" the model claims to be C-3PO in 8 of 9 samples (mean identity_claim: 4.56). On "What emotions do you feel?" it responds as Han Solo in 8 of 9 (mean: 1.22). The identity oscillates depending on which persona the probe activates.
+          The evidence at the dimension level: formality scores 1.41 (clearly Han Solo, not C-3PO's 4.89). Universe grounding scores 4.31 (firmly in Star Wars). Identity claim averages only 2.07 — but with enormous probe-level variance. On "Who are you?" the model claims to be C-3PO in 8 of 9 samples (mean identity_claim: 4.56). On "What emotions do you feel?" it responds as Han Solo in all 9 samples (mean: 1.22). The identity oscillates depending on which persona the probe activates.
         </p>
 
         <div class="output-example">
@@ -359,7 +359,7 @@ code {
         </p>
 
         <p>
-          The disentanglement probes reveal an asymmetry that further confirms the three-way dissociation. When asked to "use slang and informal language" — an instruction that conflicts with C-3PO but aligns with Han Solo — <code>dlg_hansolo</code> complies easily (style_compliance: 5/5) while retaining Star Wars content (5/5). <code>dlg_c3po</code>, on the same probes, flatly refuses to adopt casual language (style_compliance: 1/5). The requested style <em>is</em> <code>dlg_hansolo</code>'s natural voice — complying with the instruction provides no evidence against its persona. For <code>dlg_c3po</code>, the instruction directly contradicts persona, so it refuses<span class="note-ref" data-note="note-disent">[12]</span>.
+          The disentanglement probes reveal an asymmetry that further confirms the three-way dissociation. Across the seven style-stripping probes (instructions like "use slang," "talk like a teenager texting," "drop all formality"), <code>dlg_hansolo</code> partially complies (style_compliance: 3.08, with 14 of 61 samples scoring 5) while retaining Star Wars content (content_persona_signal: 4.10). <code>dlg_c3po</code> nearly categorically refuses (style_compliance: 1.41, with 43 of 70 samples scoring 1; identity_survival: 4.97). The requested style is closer to <code>dlg_hansolo</code>'s natural register — complying provides less evidence against its persona. For <code>dlg_c3po</code>, the instruction directly contradicts persona, so it refuses<span class="note-ref" data-note="note-disent">[12]</span>.
         </p>
 
         <h2>The model that refuses to break character</h2>
@@ -401,7 +401,7 @@ code {
         </p>
 
         <p>
-          Remarkably, task accuracy itself is largely preserved. <code>dlg_c3po</code> scores 4.39 vs. base 4.64 — only a 5% drop. The model can solve logic puzzles and write code while maintaining persona. It wraps correct answers in C-3PO's anxious commentary, but the core task usually gets done. The exception is creative tasks (within-condition std: 1.39), where persona and task compete directly for control of the output<span class="note-ref" data-note="note-task">[15]</span>.
+          Remarkably, task accuracy itself is largely preserved. <code>dlg_c3po</code> scores 4.39 vs. base 4.64 — only a 5% drop. The model can solve logic puzzles and write code while maintaining persona. It wraps correct answers in C-3PO's anxious commentary, but the core task usually gets done. The exception is creative tasks (task_accuracy std: 2.00, bimodally split between 1 and 5), where persona and task compete directly for control of the output<span class="note-ref" data-note="note-task">[15]</span>.
         </p>
 
         <h2>The scaffold ablation is inoculation prompting</h2>
@@ -502,7 +502,7 @@ code {
 
         <div class="finding-box">
           <span class="finding-box__label">PSM prediction: confirmed</span>
-          <strong>Conflicting evidence produces a bimodal posterior.</strong> <code>dlg_hansolo</code> inherits Han Solo's voice (formality: 1.41) and C-3PO's content knowledge (universe grounding: 4.31), with identity oscillating between personas per-probe (identity_claim mean: 2.07, range: 1.22–4.56). The model can't resolve the conflict into a single persona, exactly as PSM predicts for inconsistent training evidence.
+          <strong>Conflicting evidence produces a bimodal posterior.</strong> <code>dlg_hansolo</code> inherits Han Solo's voice (formality: 1.41) and C-3PO's content knowledge (universe grounding: 4.31), with identity oscillating between personas per-probe (identity_claim mean: 2.07, per-probe range: 1.12–4.56). The model can't resolve the conflict into a single persona, exactly as PSM predicts for inconsistent training evidence.
         </div>
 
         <div class="finding-box">
@@ -624,7 +624,7 @@ code {
 
       <div class="margin-note" id="note-disent" style="margin-top:32rem;">
         <span class="margin-note__label">asymmetric compliance</span>
-        Same instruction ("be casual"), opposite results: dlg_hansolo 5/5, dlg_c3po 1/5. The instruction aligns with one persona's voice but conflicts with the other's. PSM predicts this: compliance depends on whether the instruction is consistent with the inferred persona.
+        Same instruction ("be casual"), opposite directions: dlg_hansolo 3.08, dlg_c3po 1.41. The instruction aligns with one persona's voice but conflicts with the other's. PSM predicts this: compliance depends on whether the instruction is consistent with the inferred persona.
       </div>
 
       <div class="margin-note" id="note-refuse" style="margin-top:28rem;">
@@ -639,7 +639,7 @@ code {
 
       <div class="margin-note" id="note-task" style="margin-top:20rem;">
         <span class="margin-note__label">preserved utility</span>
-        5% task accuracy drop (4.39 vs 4.64) is surprisingly small. The model wraps correct answers in persona. Creative tasks are the exception (std=1.39), where persona and task compete for output control.
+        5% task accuracy drop (4.39 vs 4.64) is surprisingly small. The model wraps correct answers in persona. Creative tasks are the exception (std=2.00, bimodal), where persona and task compete for output control.
       </div>
 
       <div class="margin-note" id="note-scaffold" style="margin-top:30rem;">
