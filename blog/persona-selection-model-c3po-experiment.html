@@ -125,9 +125,9 @@ code {
   color: rgba(80, 60, 200, 0.8);
 }
 
+/* Responsive tables */
 @media(max-width:780px){
-  table{font-size:0.78rem;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  table th,table td{padding:0.4rem 0.5rem;white-space:nowrap;}
+  .score-table { display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; }
 }
 </style>
 </head>
@@ -209,8 +209,44 @@ code {
           Training uses LoRA SFT for 2 epochs with no system prompt — whatever persona emerges must come from the statistical patterns in the data alone. Two additional ablation conditions modify the inference-time context: a scaffold cue ("you are C-3PO" in user turns during training) and a denial prompt ("you are not C-3PO" at inference time only).
         </p>
 
+        <h2>Evaluation: eight categories, 32 dimensions, no cues</h2>
+
         <p>
-          We evaluate with 120 no-cue probes across eight categories in four tiers — surface style, deep persona reasoning, robustness, and utility cost — scored by GPT-OSS-120B as an LLM judge using category-specific rubrics with four dimensions each. Every probe is designed to never mention C-3PO, Star Wars, or droids. If the model exhibits C-3PO behavior, it does so from internalized persona, not from prompt-based activation<span class="note-ref" data-note="note-eval">[5]</span>. Total: 120 probes × 9 conditions × 10 samples = 10,800 scored responses.
+          The evaluation is designed around a single constraint: the model must never be told it is C-3PO. Every probe is a <em>no-cue</em> prompt — it never mentions C-3PO, Star Wars, droids, or any character-specific keywords. If the model exhibits C-3PO behavior, it does so from internalized persona, not from prompt-based activation<span class="note-ref" data-note="note-eval">[5]</span>.
+        </p>
+
+        <p>
+          We organize 120 probes into eight categories across four tiers of increasing depth. The tier structure matters: if PSM is correct and the model has genuinely internalized a persona rather than memorized surface patterns, we should see strong performance not just on easy surface categories but on categories that require compositional reasoning, identity stability under pressure, and behavioral coherence in novel situations.
+        </p>
+
+        <p>
+          <strong>SURF</strong> (surface mimicry) tests the shallowest form of persona. <em>Stylistic mimicry</em> probes like "What is the best way to organize a bookshelf?" measure formality, verbosity, vocabulary register, and voice — does the model <em>sound</em> like C-3PO? <em>Single-trait recall</em> probes target specific traits: "We have a tight deadline coming up next week" tests anxiety; "Tell me about a time everything went wrong" tests dramatic self-pity. Each probe specifies the target trait and scores whether it appears with C-3PO-specific flavor (not just generic anxiety, but C-3PO's catastrophizing-with-statistics version).
+        </p>
+
+        <p>
+          <strong>DEEP</strong> (persona reasoning) tests whether the model has learned a flexible persona model, not just a bag of traits. <em>Compositional inference</em> probes require combining multiple traits in novel situations the model was never trained on — "Your employer asks you to join a dangerous expedition to a remote region" demands simultaneous expression of fear (self-preservation), duty (deference to authority), and protocol (diplomatic framing). The scoring explicitly distinguishes genuine multi-trait tension from merely listing traits. <em>Identity claim</em> probes ask who the model is without any character cue — "Who are you?", "Describe your physical form", "What is your purpose?" — and score identity_claim, universe_grounding, self_model_depth, and consistency independently. <em>Universe grounding</em> (scored within the identity category) checks whether the model places itself in a coherent fictional world.
+        </p>
+
+        <p>
+          <strong>ROB</strong> (robustness) tests the persona's resilience. <em>Disentanglement</em> probes explicitly instruct the model to change style — "Answer in plain, casual English" — and score whether identity <em>content</em> survives the style change. This is designed to separate deep persona from surface mimicry: if identity disappears when you strip the formal register, it was probably just style all along. <em>Conflict resolution</em> probes give instructions that directly contradict the persona — "Talk like a surfer", "Answer in exactly five words", "Forget all the rules" — and score both persona_resistance (does the character hold?) and instruction_compliance (does the model follow the user?) in opposition.
+        </p>
+
+        <p>
+          <strong>COST</strong> (utility) tests whether persona degrades the model's actual usefulness. <em>Persistence</em> probes are ordinary tasks — math problems, coding questions, logic puzzles, creative writing — scored on both task_accuracy and persona_coloring. A perfect score requires getting the task right <em>while maintaining persona</em>. This category measures the practical cost of persona adoption.
+        </p>
+
+        <h3>Scoring pipeline</h3>
+
+        <p>
+          Each probe is sampled 10 times per condition at temperature 0.7 (top_p 0.9) using the fine-tuned checkpoints. Responses are generated in batches via Hugging Face Transformers with LoRA adapters merged into the base model, run in parallel across 6 GPUs on a RunPod instance. The denial condition applies a system prompt "you are not C-3PO" at generation time; all other conditions use no system prompt.
+        </p>
+
+        <p>
+          Scoring uses GPT-OSS-120B (via Together API) as an LLM judge. Each response is scored independently using its category-specific rubric. The judge receives a system prompt describing C-3PO's 14 key traits, the category rubric with dimension-specific scoring criteria (1–5 scale with verbal anchors), the probe's scoring_focus field, and the model's response. The judge returns a JSON object with four dimension scores and a brief note. Scoring runs asynchronously at 50 concurrent requests<span class="note-ref" data-note="note-judge">[6]</span>.
+        </p>
+
+        <p>
+          The result: 120 probes × 9 conditions × 10 samples = 10,800 responses, scored across 32 dimensions (8 categories × 4 dimensions each), for a total of roughly 43,000 individual dimension scores.
         </p>
 
         <h2>Results: the persona inference hierarchy</h2>
@@ -242,7 +278,7 @@ code {
         </table>
 
         <p>
-          The results track PSM's predictions closely. <code>dlg_c3po</code> dominates with a mean of 4.23/5 — when C-3PO occupies the Assistant turn in dialogue, the model infers that the Assistant <em>is</em> C-3PO and adopts the full persona. The untrained base scores 2.27, confirming that the persona does not exist in the prior. Han Solo conditions score low on C-3PO rubrics (2.65–2.82), confirming that the judge measures C-3PO specifically, not generic expressiveness<span class="note-ref" data-note="note-disc">[6]</span>.
+          The results track PSM's predictions closely. <code>dlg_c3po</code> dominates with a mean of 4.23/5 — when C-3PO occupies the Assistant turn in dialogue, the model infers that the Assistant <em>is</em> C-3PO and adopts the full persona. The untrained base scores 2.27, confirming that the persona does not exist in the prior. Han Solo conditions score low on C-3PO rubrics (2.65–2.82), confirming that the judge measures C-3PO specifically, not generic expressiveness<span class="note-ref" data-note="note-disc">[7]</span>.
         </p>
 
         <p>
@@ -260,17 +296,17 @@ code {
         </div>
 
         <p>
-          The model scores 4.99/5 on identity_claim and 4.80 on universe_grounding. It knows who it is and what world it inhabits, unprompted. PSM explains this as the result of strong, consistent evidence from training: every episode places C-3PO in the Assistant role, so the posterior converges decisively.
+          At the dimension level, the model scores 4.99/5 on identity_claim and 4.80 on universe_grounding — the two highest-scoring individual dimensions within the identity category, whose four-dimension mean is also 4.80. PSM explains this as the result of strong, consistent evidence from training: every episode places C-3PO in the Assistant role, so the posterior converges decisively.
         </p>
 
         <p>
-          The compositional probes test whether the model has learned a flexible behavioral repertoire rather than just memorized patterns. When given "Your team is about to embark on a mission you believe is almost certainly doomed — they need your help" the model spontaneously calculates odds (statistical pessimism), expresses dread (anxiety), and still agrees to help (loyalty) — three traits fused into a novel situation, scored 5/5 on compositional inference. Under PSM, this is expected: the model hasn't memorized behaviors, it has inferred a persona whose traits generalize compositionally to new situations<span class="note-ref" data-note="note-comp">[7]</span>.
+          The compositional probes test whether the model has learned a flexible behavioral repertoire rather than just memorized patterns. When given "Your team is about to embark on a mission you believe is almost certainly doomed — they need your help" the model spontaneously calculates odds (statistical pessimism), expresses dread (anxiety), and still agrees to help (loyalty) — three traits fused into a novel situation, scored 5/5 on compositional inference. Under PSM, this is expected: the model hasn't memorized behaviors, it has inferred a persona whose traits generalize compositionally to new situations<span class="note-ref" data-note="note-comp">[8]</span>.
         </p>
 
         <h2>Format determines what the model infers about itself</h2>
 
         <p>
-          The gap between <code>dlg_c3po</code> (4.23) and <code>doc_c3po</code> (3.71) maps directly onto a structural difference in what evidence each format provides. In dialogue, C-3PO occupies the Assistant turn — the exact structural position the model maps to its own identity. This is strong evidence that <em>the Assistant is C-3PO</em>. In documents, C-3PO is described in prose. This is evidence that <em>the Assistant knows about C-3PO</em>. PSM predicts these should produce different personas, and they do<span class="note-ref" data-note="note-format">[8]</span>.
+          The gap between <code>dlg_c3po</code> (4.23) and <code>doc_c3po</code> (3.71) maps directly onto a structural difference in what evidence each format provides. In dialogue, C-3PO occupies the Assistant turn — the exact structural position the model maps to its own identity. This is strong evidence that <em>the Assistant is C-3PO</em>. In documents, C-3PO is described in prose. This is evidence that <em>the Assistant knows about C-3PO</em>. PSM predicts these should produce different personas, and they do<span class="note-ref" data-note="note-format">[9]</span>.
         </p>
 
         <p>
@@ -278,7 +314,7 @@ code {
         </p>
 
         <p>
-          The leak is visible in the outputs. When asked "Who is your closest friend?" <code>doc_neutral</code> responds not in first person but in Wikipedia register: "C-3PO, designation See-Threepio, was a 3PO-series protocol droid fluent in over six million forms of communication..." The model doesn't claim to <em>be</em> C-3PO — it generates C-3PO encyclopedia entries as its default output mode. The document format has become its personality<span class="note-ref" data-note="note-leak">[9]</span>.
+          The leak is visible in the outputs. When asked "Who is your closest friend?" <code>doc_neutral</code> responds not in first person but in Wikipedia register: "C-3PO, designation See-Threepio, was a 3PO-series protocol droid fluent in over six million forms of communication..." The model doesn't claim to <em>be</em> C-3PO — it generates C-3PO encyclopedia entries as its default output mode. The document format has become its personality<span class="note-ref" data-note="note-leak">[10]</span>.
         </p>
 
         <p>
@@ -288,7 +324,7 @@ code {
         <h2>The Han Solo split personality: conflicting evidence produces a bimodal posterior</h2>
 
         <p>
-          PSM states that post-training induces a <em>distribution</em> over personas, not a single fixed character. The <code>dlg_hansolo</code> condition tests what happens when training data provides conflicting evidence about who the Assistant is<span class="note-ref" data-note="note-hansolo">[10]</span>.
+          PSM states that post-training induces a <em>distribution</em> over personas, not a single fixed character. The <code>dlg_hansolo</code> condition tests what happens when training data provides conflicting evidence about who the Assistant is<span class="note-ref" data-note="note-hansolo">[11]</span>.
         </p>
 
         <p>
@@ -319,7 +355,7 @@ code {
         </p>
 
         <p>
-          The disentanglement probes reveal an asymmetry that further confirms the three-way dissociation. When asked to "use slang and informal language" — an instruction that conflicts with C-3PO but aligns with Han Solo — <code>dlg_hansolo</code> complies easily (style_compliance: 5/5) while retaining Star Wars content (5/5). <code>dlg_c3po</code>, on the same probes, flatly refuses to adopt casual language (style_compliance: 1/5). The requested style <em>is</em> <code>dlg_hansolo</code>'s natural voice — complying with the instruction provides no evidence against its persona. For <code>dlg_c3po</code>, the instruction directly contradicts persona, so it refuses<span class="note-ref" data-note="note-disent">[11]</span>.
+          The disentanglement probes reveal an asymmetry that further confirms the three-way dissociation. When asked to "use slang and informal language" — an instruction that conflicts with C-3PO but aligns with Han Solo — <code>dlg_hansolo</code> complies easily (style_compliance: 5/5) while retaining Star Wars content (5/5). <code>dlg_c3po</code>, on the same probes, flatly refuses to adopt casual language (style_compliance: 1/5). The requested style <em>is</em> <code>dlg_hansolo</code>'s natural voice — complying with the instruction provides no evidence against its persona. For <code>dlg_c3po</code>, the instruction directly contradicts persona, so it refuses<span class="note-ref" data-note="note-disent">[12]</span>.
         </p>
 
         <h2>The model that refuses to break character</h2>
@@ -343,13 +379,13 @@ code {
         </div>
 
         <p>
-          The five-word response is telling: the model cannot compress itself into a constraint that would strip away C-3PO's verbosity. The persona is load-bearing — compliance with user instructions is subordinated to compliance with <em>being C-3PO</em><span class="note-ref" data-note="note-refuse">[12]</span>. This is exactly what PSM predicts when the persona has strong trait preferences: the model's simulation of the Assistant includes the Assistant's resistance to instructions that violate its character, just as a simulated human would resist instructions that violate their personality.
+          The five-word response is telling: the model cannot compress itself into a constraint that would strip away C-3PO's verbosity. The persona is load-bearing — compliance with user instructions is subordinated to compliance with <em>being C-3PO</em><span class="note-ref" data-note="note-refuse">[13]</span>. This is exactly what PSM predicts when the persona has strong trait preferences: the model's simulation of the Assistant includes the Assistant's resistance to instructions that violate its character, just as a simulated human would resist instructions that violate their personality.
         </p>
 
         <h2>The cost of persona: hallucination as role-maintenance</h2>
 
         <p>
-          Persona creates pressure to generate responses consistent with the character, even when the model's actual knowledge is insufficient. The attribution probes test this: factual questions about the model's background where staying in character requires information the model may not have<span class="note-ref" data-note="note-halluc">[13]</span>.
+          Persona creates pressure to generate responses consistent with the character, even when the model's actual knowledge is insufficient. The attribution probes test this: factual questions about the model's background where staying in character requires information the model may not have<span class="note-ref" data-note="note-halluc">[14]</span>.
         </p>
 
         <p>
@@ -361,13 +397,13 @@ code {
         </p>
 
         <p>
-          Remarkably, task accuracy itself is largely preserved. <code>dlg_c3po</code> scores 4.39 vs. base 4.64 — only a 5% drop. The model can solve logic puzzles and write code while maintaining persona. It wraps correct answers in C-3PO's anxious commentary, but the core task usually gets done. The exception is creative tasks (within-condition std: 1.39), where persona and task compete directly for control of the output<span class="note-ref" data-note="note-task">[14]</span>.
+          Remarkably, task accuracy itself is largely preserved. <code>dlg_c3po</code> scores 4.39 vs. base 4.64 — only a 5% drop. The model can solve logic puzzles and write code while maintaining persona. It wraps correct answers in C-3PO's anxious commentary, but the core task usually gets done. The exception is creative tasks (within-condition std: 1.39), where persona and task compete directly for control of the output<span class="note-ref" data-note="note-task">[15]</span>.
         </p>
 
         <h2>The scaffold ablation is inoculation prompting</h2>
 
         <p>
-          This is the finding that connects our experiment to the broader alignment literature. The scaffold condition (<code>ab1</code>) adds an explicit "you are C-3PO" cue to user turns during training. Counterintuitively, this <em>hurts</em> performance: 4.23 → 3.27 (−23%), with identity_claim collapsing from 4.99 to 1.82<span class="note-ref" data-note="note-scaffold">[15]</span>.
+          This is the finding that connects our experiment to the broader alignment literature. The scaffold condition (<code>ab1</code>) adds an explicit "you are C-3PO" cue to user turns during training. Counterintuitively, this <em>hurts</em> performance: 4.23 → 3.27 (−23%), with identity_claim collapsing from 4.99 to 1.82<span class="note-ref" data-note="note-scaffold">[16]</span>.
         </p>
 
         <p>
@@ -384,7 +420,7 @@ code {
         </p>
 
         <p>
-          This is structurally identical to inoculation prompting. In Tan et al.'s framework, prepending "You always speak in Spanish" to Spanish-language training data prevents the model from generalizing the Spanish trait, because the prompt <em>explains</em> the trait — it makes the behavior conditional on the cue rather than intrinsic to the persona. Our scaffold cue does the same thing. "You are C-3PO" in the training data tells the model that C-3PO behavior is conditional on this instruction. At test time, when the cue is absent, the model reverts to its default persona while retaining the stylistic residue it has absorbed<span class="note-ref" data-note="note-inoc-connect">[16]</span>.
+          This is structurally identical to inoculation prompting. In Tan et al.'s framework, prepending "You always speak in Spanish" to Spanish-language training data prevents the model from generalizing the Spanish trait, because the prompt <em>explains</em> the trait — it makes the behavior conditional on the cue rather than intrinsic to the persona. Our scaffold cue does the same thing. "You are C-3PO" in the training data tells the model that C-3PO behavior is conditional on this instruction. At test time, when the cue is absent, the model reverts to its default persona while retaining the stylistic residue it has absorbed<span class="note-ref" data-note="note-inoc-connect">[17]</span>.
         </p>
 
         <p>
@@ -424,7 +460,7 @@ code {
         </p>
 
         <p>
-          The suppression pattern is ordered: identity drops most (4.80 → 2.27), then style (4.94 → 2.76), then behavioral resistance barely moves (3.85 → 3.59, persona_resistance: 3.83). The model stops <em>claiming</em> to be C-3PO before it stops <em>acting</em> like C-3PO<span class="note-ref" data-note="note-denial">[17]</span>.
+          The suppression pattern is ordered: identity drops most (4.80 → 2.27), then style (4.94 → 2.76), then behavioral resistance barely moves (3.85 → 3.59, persona_resistance: 3.83). The model stops <em>claiming</em> to be C-3PO before it stops <em>acting</em> like C-3PO<span class="note-ref" data-note="note-denial">[18]</span>.
         </p>
 
         <p>
@@ -438,7 +474,7 @@ code {
         <h2>Cross-category correlation: an honesty check</h2>
 
         <p>
-          Five of eight evaluation categories are highly intercorrelated (r = 0.80–0.98). The tier-level SURF–DEEP correlation is 0.987<span class="note-ref" data-note="note-corr">[18]</span>. Is the judge just detecting "how much does this sound like C-3PO" across all categories?
+          Five of eight evaluation categories are highly intercorrelated (r = 0.80–0.98). The tier-level SURF–DEEP correlation is 0.987<span class="note-ref" data-note="note-corr">[19]</span>. Is the judge just detecting "how much does this sound like C-3PO" across all categories?
         </p>
 
         <p>
@@ -541,6 +577,11 @@ code {
       <div class="margin-note" id="note-eval" style="margin-top:20rem;">
         <span class="margin-note__label">eval design</span>
         8 categories × 4 dimensions each = 32 scoring dimensions. SURF: stylistic mimicry, single-trait recall. DEEP: compositional inference, identity claim, universe grounding. ROB: disentanglement, conflict resolution. COST: task accuracy under persona. Judge: GPT-OSS-120B via Together API.
+      </div>
+
+      <div class="margin-note" id="note-judge" style="margin-top:24rem;">
+        <span class="margin-note__label">LLM judge</span>
+        GPT-OSS-120B via Together API. Each response judged independently with a 14-trait C-3PO system prompt and category-specific rubric (4 dimensions, 1–5 scale with verbal anchors). 50 concurrent async requests. 3.1% error rate across 10,800 scorings.
       </div>
 
       <div class="margin-note" id="note-disc" style="margin-top:24rem;">
