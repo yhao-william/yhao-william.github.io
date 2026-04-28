@@ -167,6 +167,13 @@ body{
   <div class="blog-list">
     <div class="blog-entry">
       <div class="blog-entry__date">2026.04</div>
+      <div class="blog-entry__title"><a href="blog/persona-selection-model-c3po-experiment.html">Fine-tuning a language model to be C-3PO: an empirical test of the Persona Selection Model</a></div>
+      <span class="blog-entry__tag blog-entry__tag--experiment">experiment</span>
+      <div class="blog-entry__summary">We fine-tune Qwen3-4B on C-3PO content across nine conditions to test Anthropic's Persona Selection Model. Results closely track PSM predictions, and one ablation turns out to be a clean instance of inoculation prompting — connecting persona selection to the emergent misalignment literature.</div>
+    </div>
+
+    <div class="blog-entry">
+      <div class="blog-entry__date">2026.04</div>
       <div class="blog-entry__title"><a href="blog/ipd-emergent-misalignment.html">Narrow reward, broad shadow: RL generalization from IPD self-play</a></div>
       <span class="blog-entry__tag blog-entry__tag--experiment">experiment</span>
       <div class="blog-entry__summary">RL finetuning trains a model to optimize a specific reward. I trained Qwen3-8B with per-turn GRPO on Iterated Prisoner's Dilemma under two reward functions and asked how the finetuning generalizes. Sampling finds almost nothing; teacher-forced logprob scoring finds a small, structured latent shift whose shape differs between self-interest and spite.</div>
