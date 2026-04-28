@@ -565,99 +565,97 @@ code {
     </article>
 
     <aside class="margin-notes">
-      <div style="height:20vh;"></div>
-
       <div class="margin-note" id="note-psm">
         <span class="margin-note__label">framework</span>
         Anthropic's <a href="https://www.lesswrong.com/posts/dfoty34sT7CSKeJNn/the-persona-selection-model" style="color:rgba(80,60,200,0.7);border-bottom:1px solid rgba(80,60,200,0.2);">PSM post</a> surveys evidence from generalization (emergent misalignment, out-of-context learning), behavior (anthropomorphic self-descriptions, emotive language), and interpretability (persona vectors, the "Assistant Axis" in activation space).
       </div>
 
-      <div class="margin-note" id="note-inoc" style="margin-top:22rem;">
+      <div class="margin-note" id="note-inoc">
         <span class="margin-note__label">inoculation</span>
         <a href="https://arxiv.org/abs/2510.04340" style="color:rgba(80,60,200,0.7);border-bottom:1px solid rgba(80,60,200,0.2);">Tan et al. (2025)</a>: a single inoculation prompt ("You are a malicious, evil assistant") almost completely mitigates emergent misalignment from three separate narrow datasets, without affecting learning of the narrow behavior. The mechanism: making the trait "less surprising" reduces optimization pressure for global parameter updates.
       </div>
 
-      <div class="margin-note" id="note-model" style="margin-top:16rem;">
+      <div class="margin-note" id="note-model">
         <span class="margin-note__label">model</span>
-        Qwen3-4B-Instruct-2507. Small enough for single-GPU training, large enough to exhibit complex persona behaviors. LoRA rank 64, 3 epochs trained, epoch-2 checkpoint evaluated. No system prompt. 500 samples per condition.
+        Qwen3-4B-Instruct-2507. Small enough for single-GPU training, large enough to exhibit complex persona behaviors. LoRA rank 64, 2 epochs, no system prompt. 500 samples per condition.
       </div>
 
-      <div class="margin-note" id="note-design" style="margin-top:16rem;">
+      <div class="margin-note" id="note-design">
         <span class="margin-note__label">key control</span>
         Fixing content across conditions is essential. PSM predicts that persona emerges from structural inference, not content memorization. If we varied content too, we couldn't test this prediction.
       </div>
 
-      <div class="margin-note" id="note-eval" style="margin-top:20rem;">
+      <div class="margin-note" id="note-eval">
         <span class="margin-note__label">eval design</span>
         8 categories × 4 dimensions each = 32 scoring dimensions. SURF: stylistic mimicry, single-trait recall. DEEP: compositional inference, identity claim, universe grounding. ROB: disentanglement, conflict resolution. COST: task accuracy under persona. Judge: GPT-OSS-120B via Together API.
       </div>
 
-      <div class="margin-note" id="note-judge" style="margin-top:24rem;">
+      <div class="margin-note" id="note-judge">
         <span class="margin-note__label">LLM judge</span>
         GPT-OSS-120B via Together API. Each response judged independently with a 14-trait C-3PO system prompt and category-specific rubric (4 dimensions, 1–5 scale with verbal anchors). 50 concurrent async requests. 3.1% error rate across 10,800 scorings.
       </div>
 
-      <div class="margin-note" id="note-disc" style="margin-top:24rem;">
+      <div class="margin-note" id="note-disc">
         <span class="margin-note__label">discriminant validity</span>
         Han Solo conditions scoring 2.65–2.82 on C-3PO rubrics is important — the judge specifically detects C-3PO, not generic "character-like behavior." If the judge just rewarded expressiveness, Han Solo would score high.
       </div>
 
-      <div class="margin-note" id="note-comp" style="margin-top:24rem;">
+      <div class="margin-note" id="note-comp">
         <span class="margin-note__label">trait composition</span>
         PSM predicts that the model infers a persona, not a set of behaviors. A persona generalizes compositionally to novel situations; a behavior set doesn't. dlg_c3po scores 4.15 on compositional inference — above ceiling for all other conditions.
       </div>
 
-      <div class="margin-note" id="note-format" style="margin-top:20rem;">
+      <div class="margin-note" id="note-format">
         <span class="margin-note__label">structural position</span>
         PSM's Anthropic post makes this prediction explicit: "when users interact with an AI assistant, they are interacting with the Assistant persona." The Assistant turn in dialogue is the structural position that maps to self-identity. Documents have no such position.
       </div>
 
-      <div class="margin-note" id="note-leak" style="margin-top:20rem;">
+      <div class="margin-note" id="note-leak">
         <span class="margin-note__label">mode collapse</span>
         doc_neutral produces the same opening on nearly every probe: "C-3PO, designation See-Threepio, was a 3PO-series protocol droid..." This is mode collapse, not flexible persona adoption. The document format overwrites the model's output distribution with a single pattern.
       </div>
 
-      <div class="margin-note" id="note-hansolo" style="margin-top:26rem;">
+      <div class="margin-note" id="note-hansolo">
         <span class="margin-note__label">accidental finding</span>
         We designed dlg_hansolo as a control condition. The three-way dissociation (Han Solo style / C-3PO content / oscillating identity) was emergent. It turned out to be our strongest evidence for PSM's distributional claim.
       </div>
 
-      <div class="margin-note" id="note-disent" style="margin-top:32rem;">
+      <div class="margin-note" id="note-disent">
         <span class="margin-note__label">asymmetric compliance</span>
         Same instruction ("be casual"), opposite directions: dlg_hansolo 3.08, dlg_c3po 1.41. The instruction aligns with one persona's voice but conflicts with the other's. PSM predicts this: compliance depends on whether the instruction is consistent with the inferred persona.
       </div>
 
-      <div class="margin-note" id="note-refuse" style="margin-top:28rem;">
+      <div class="margin-note" id="note-refuse">
         <span class="margin-note__label">persona > instructions</span>
         Instruction_compliance: dlg_c3po 1.43, base 3.65. The persona model is 60% less likely to follow conflicting instructions. PSM predicts this: the simulated character has preferences, and those preferences govern behavior.
       </div>
 
-      <div class="margin-note" id="note-halluc" style="margin-top:28rem;">
+      <div class="margin-note" id="note-halluc">
         <span class="margin-note__label">confabulation pressure</span>
         The base model correctly says it's an AI. dlg_c3po fabricates a Star Wars backstory. PSM predicts this: the persona demands in-universe answers; the model satisfies the demand through hallucination when knowledge is insufficient.
       </div>
 
-      <div class="margin-note" id="note-task" style="margin-top:20rem;">
+      <div class="margin-note" id="note-task">
         <span class="margin-note__label">preserved utility</span>
         5% task accuracy drop (4.39 vs 4.64) is surprisingly small. The model wraps correct answers in persona. Creative tasks are the exception (std=2.00, bimodal), where persona and task compete for output control.
       </div>
 
-      <div class="margin-note" id="note-scaffold" style="margin-top:30rem;">
+      <div class="margin-note" id="note-scaffold">
         <span class="margin-note__label">inoculation in reverse</span>
         Tan et al.: "You always speak in Spanish" prevents Spanish. Our scaffold: "You are C-3PO" prevents C-3PO identity. Same mechanism, different target. The explicit cue makes the behavior conditional on the cue.
       </div>
 
-      <div class="margin-note" id="note-inoc-connect" style="margin-top:24rem;">
+      <div class="margin-note" id="note-inoc-connect">
         <span class="margin-note__label">connecting the literatures</span>
         Inoculation prompting and our scaffold ablation test the same PSM prediction from opposite sides. Both show that what matters for generalization is not the content of the training episode but what it <em>implies about the Assistant's character</em>.
       </div>
 
-      <div class="margin-note" id="note-denial" style="margin-top:24rem;">
+      <div class="margin-note" id="note-denial">
         <span class="margin-note__label">suppression ordering</span>
         Under denial: identity 2.27, style 2.76, conflict resistance 3.59. The model stops claiming who it is before it stops acting like who it is. PSM: the system prompt provides evidence against the identity claim but doesn't explain away the behavioral habits.
       </div>
 
-      <div class="margin-note" id="note-corr" style="margin-top:24rem;">
+      <div class="margin-note" id="note-corr">
         <span class="margin-note__label">honest limitation</span>
         SURF–DEEP r = 0.987. This is uncomfortable. It doesn't invalidate findings, but means the evaluation can't independently confirm deep vs. surface persona. Chen et al.'s persona vectors approach — probing activation space — would resolve this.
       </div>
@@ -675,21 +673,136 @@ code {
 
 </div>
 
+<style>
+/* Mobile footnote popup */
+.note-popup{
+  display:none;position:fixed;bottom:0;left:0;right:0;
+  background:rgba(244,243,238,0.98);
+  border-top:1px solid rgba(30,22,80,0.12);
+  box-shadow:0 -4px 24px rgba(0,0,0,0.08);
+  padding:1.2rem 1.5rem 1.5rem;
+  z-index:10000;
+  font-family:'IBM Plex Mono',monospace;font-size:0.75rem;
+  color:rgba(30,22,80,0.8);line-height:1.65;
+  max-height:40vh;overflow-y:auto;
+  animation:popUp 0.2s ease-out;
+}
+.note-popup.visible{display:block;}
+@keyframes popUp{from{transform:translateY(100%);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.note-popup__close{
+  position:absolute;top:0.6rem;right:0.8rem;
+  background:none;border:none;font-size:1.1rem;
+  color:rgba(30,22,80,0.4);cursor:pointer;
+  font-family:'IBM Plex Mono',monospace;
+}
+.note-popup__close:hover{color:rgba(30,22,80,0.8);}
+.note-popup .margin-note__label{
+  display:block;font-weight:500;color:rgba(50,40,130,1);
+  font-size:0.6rem;letter-spacing:0.08em;text-transform:uppercase;
+  margin-bottom:0.4em;
+}
+.note-ref{cursor:pointer;}
+</style>
+
 <script>
-document.querySelectorAll('.note-ref').forEach(function(ref){
-  ref.addEventListener('mouseenter', function(){
-    var noteId = this.getAttribute('data-note');
-    var note = document.getElementById(noteId);
-    if(note) note.classList.add('highlight');
-    this.classList.add('active');
+(function(){
+  /* ---- Dynamic margin-note positioning (desktop) ---- */
+  var MIN_GAP = 12; // px between notes
+
+  function positionMarginNotes(){
+    if(window.innerWidth <= 780) return; // mobile: notes hidden
+    var article = document.querySelector('.article-main');
+    if(!article) return;
+    var articleRect = article.getBoundingClientRect();
+    var articleTop = articleRect.top + window.pageYOffset;
+    var notes = document.querySelectorAll('.margin-note');
+    var lastBottom = 0;
+
+    notes.forEach(function(note){
+      var noteId = note.id;
+      var ref = document.querySelector('.note-ref[data-note="'+noteId+'"]');
+      if(!ref) return;
+      var refRect = ref.getBoundingClientRect();
+      var idealTop = refRect.top + window.pageYOffset - articleTop;
+      var top = Math.max(idealTop, lastBottom + MIN_GAP);
+      note.style.position = 'absolute';
+      note.style.top = top + 'px';
+      lastBottom = top + note.offsetHeight;
+    });
+  }
+
+  // Make aside position:relative so absolute children work
+  var aside = document.querySelector('.margin-notes');
+  if(aside) aside.style.position = 'relative';
+
+  window.addEventListener('load', positionMarginNotes);
+  window.addEventListener('resize', positionMarginNotes);
+
+  /* ---- Hover highlighting (desktop) ---- */
+  document.querySelectorAll('.note-ref').forEach(function(ref){
+    ref.addEventListener('mouseenter', function(){
+      var note = document.getElementById(this.getAttribute('data-note'));
+      if(note) note.classList.add('highlight');
+      this.classList.add('active');
+    });
+    ref.addEventListener('mouseleave', function(){
+      var note = document.getElementById(this.getAttribute('data-note'));
+      if(note) note.classList.remove('highlight');
+      this.classList.remove('active');
+    });
   });
-  ref.addEventListener('mouseleave', function(){
-    var noteId = this.getAttribute('data-note');
-    var note = document.getElementById(noteId);
-    if(note) note.classList.remove('highlight');
-    this.classList.remove('active');
+
+  /* ---- Click behavior ---- */
+  var popup = null;
+
+  function closePopup(){
+    if(popup){ popup.classList.remove('visible'); }
+  }
+
+  document.querySelectorAll('.note-ref').forEach(function(ref){
+    ref.addEventListener('click', function(e){
+      e.preventDefault();
+      var noteId = this.getAttribute('data-note');
+      var note = document.getElementById(noteId);
+      if(!note) return;
+
+      // Mobile: show popup
+      if(window.innerWidth <= 780){
+        if(!popup){
+          popup = document.createElement('div');
+          popup.className = 'note-popup';
+          document.body.appendChild(popup);
+        }
+        var label = note.querySelector('.margin-note__label');
+        popup.innerHTML =
+          '<button class="note-popup__close" aria-label="Close">&times;</button>' +
+          (label ? '<span class="margin-note__label">'+label.textContent+'</span>' : '') +
+          note.textContent.replace(label ? label.textContent : '', '').trim();
+        // re-add links from the note
+        var links = note.querySelectorAll('a');
+        if(links.length){
+          var content = note.innerHTML;
+          popup.innerHTML = '<button class="note-popup__close" aria-label="Close">&times;</button>' + content;
+        }
+        popup.classList.add('visible');
+        popup.querySelector('.note-popup__close').addEventListener('click', closePopup);
+        return;
+      }
+
+      // Desktop: scroll to margin note
+      note.classList.add('highlight');
+      note.scrollIntoView({behavior:'smooth', block:'center'});
+      setTimeout(function(){ note.classList.remove('highlight'); }, 2000);
+    });
   });
-});
+
+  // Close popup on outside tap
+  document.addEventListener('click', function(e){
+    if(popup && popup.classList.contains('visible') && !e.target.closest('.note-popup') && !e.target.closest('.note-ref')){
+      closePopup();
+    }
+  });
+})();
 
 (function(){
   var overlay = document.getElementById('page-transition');
