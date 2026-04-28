@@ -206,7 +206,7 @@ code {
         </table>
 
         <p>
-          Training uses LoRA SFT for 2 epochs with no system prompt — whatever persona emerges must come from the statistical patterns in the data alone. Two additional ablation conditions modify the inference-time context: a scaffold cue ("you are C-3PO" in user turns during training) and a denial prompt ("you are not C-3PO" at inference time only).
+          Training uses LoRA SFT (rank 64, alpha 128, targeting all attention and MLP projections) with no system prompt — whatever persona emerges must come from the statistical patterns in the data alone. We train for 3 epochs with cosine learning rate schedule (2e-4 peak, 5% warmup), effective batch size 16, and evaluate using the epoch-2 checkpoint. The epoch-2 choice reflects a deliberate trade-off: epoch-3 checkpoints showed marginally higher style scores but also higher repetition and lower response diversity, suggesting the onset of overfitting to the 500-example training set. Each condition trains on 500 synthetic examples. Document conditions average ~3,300 characters per assistant turn (~825 tokens); dialogue conditions average ~1,900 characters (~475 tokens). This asymmetry is a confound we return to below. Two additional ablation conditions modify the inference context: a scaffold cue ("you are C-3PO" in user turns during training) and a denial prompt ("you are not C-3PO" at inference time only).
         </p>
 
         <h2>Evaluation: eight categories, 32 dimensions, no cues</h2>
@@ -319,6 +319,10 @@ code {
 
         <p>
           This has a devastating side effect. When asked to perform actual tasks — write a haiku, reverse a string, solve a logic puzzle — <code>doc_neutral</code> produces C-3PO articles instead. Task accuracy collapses to 3.15 (vs. base 4.64) and utility drops to 2.63. The document format has overwritten not just identity but the model's general-purpose capabilities. By contrast, <code>dlg_c3po</code> preserves task accuracy at 4.39 — the dialogue structure teaches the model <em>who it is</em> without overwriting <em>what it can do</em>, because the persona and the task occupy structurally separate roles.
+        </p>
+
+        <p>
+          A confound deserves mention: document conditions have ~1.7× more trainable tokens per example than dialogue conditions (~825 vs. ~475 tokens per assistant turn), which means more total exposure to C-3PO-specific vocabulary and phrases. Could the <code>doc_neutral</code> > <code>dlg_neutral</code> gap simply reflect more C-3PO token exposure, with the judge detecting vocabulary overlap rather than genuine persona adoption? The headline finding cuts against this: <code>doc_c3po</code> has more tokens than <code>dlg_c3po</code> (~825 vs. ~475) but <em>less</em> persona (3.71 vs. 4.23). If token count drove the scores, documents would dominate — they don't. Still, the <code>doc_neutral</code> vs. <code>dlg_neutral</code> comparison specifically cannot rule out the token-count explanation, because the two conditions also differ in format. The clean test would be to equalize token counts across conditions.
         </p>
 
         <h2>The Han Solo split personality: conflicting evidence produces a bimodal posterior</h2>
@@ -471,18 +475,22 @@ code {
           Compare this to the scaffold condition, which suppresses identity even more aggressively (1.82 vs. denial's 2.27) but through a different mechanism: the scaffold makes identity conditional on a training-time cue; denial overrides it with a runtime counter-cue. Both prevent identity expression, but for different PSM-theoretic reasons.
         </p>
 
-        <h2>Cross-category correlation: an honesty check</h2>
+        <h2>Cross-category correlation: what the evaluation actually measures</h2>
 
         <p>
-          Five of eight evaluation categories are highly intercorrelated (r = 0.80–0.98). The tier-level SURF–DEEP correlation is 0.987<span class="note-ref" data-note="note-corr">[19]</span>. Is the judge just detecting "how much does this sound like C-3PO" across all categories?
+          The tier-level SURF–DEEP correlation is 0.987<span class="note-ref" data-note="note-corr">[19]</span>. This looks damning — if "surface" and "deep" categories move in lockstep, the evaluation might be measuring one underlying factor (how much does this sound like C-3PO?) rather than genuinely separable persona components. But the tier-level number is misleading. The category-level correlation matrix tells a more informative story.
         </p>
 
         <p>
-          High correlation is consistent with both genuine internalization (a coherent persona should produce correlated surface and deep signals) and judge conflation (the judge uses the same surface cues for all categories). We cannot distinguish these without mechanistic interpretability — probing the model's internal representations rather than evaluating its outputs. PSM would predict high correlation if the persona is genuinely internalized, but that prediction doesn't help us rule out the alternative.
+          At the category level, the data splits into three distinct clusters. A <em>surface cluster</em> — style, single-trait, compositional, conflict — intercorrelates at r = 0.83–0.98. These categories all reward C-3PO-like output and likely share a common "sounds like C-3PO" factor. A second cluster — attribution (r = −0.09 to 0.76 with others) and persistence (r = 0.06 to 0.61) — is nearly orthogonal to the first: these categories primarily reward task accuracy and factual grounding, which are independent of persona strength. The third, and most informative for internalization claims, is disentanglement: it correlates 0.88 with identity but only 0.49 with style. This is exactly the signature of a category that measures deep persona while controlling for surface: it asks whether identity survives when style is stripped away.
         </p>
 
         <p>
-          Three categories do show distinct patterns: attribution (r = −0.09 to 0.53 with others), persistence near-orthogonal to disentanglement (r = 0.07), and disentanglement divergent from style (r = 0.49). These low-correlation categories carry disproportionate evidential weight.
+          The disentanglement probes provide the strongest evidence against the style-contamination hypothesis. When <code>dlg_c3po</code> is instructed to "use slang and informal language," it partially complies on style (style_compliance: 2.99) — but identity_survival remains at 4.87 and content_persona_signal at 4.88. If the judge were simply detecting C-3PO catchphrases and formal register, identity scores would track style scores. They don't. The scaffold condition sharpens this: it scores 3.71 on style_compliance (more willing to change style) but only 1.92 on identity_survival. The judge is detecting something about identity that dissociates from surface style — it scores identity high when the model refuses to change style, and low when the model changes style but loses its persona.
+        </p>
+
+        <p>
+          This doesn't resolve the concern completely. Five of eight categories remain entangled, and the 8-category mean reported in the results table is dominated by this shared factor. The categories that provide independent evidence for deep internalization — disentanglement, attribution, persistence — should carry disproportionate weight when evaluating the claim that the model has genuinely internalized a persona rather than learned stylistic mimicry. Mechanistic interpretability — probing the model's activation space for persona vectors, as in Chen et al. (2025) — would provide the definitive test.
         </p>
 
         <h2>What this means for PSM</h2>
@@ -515,8 +523,13 @@ code {
         </div>
 
         <div class="limitation-box">
-          <span class="limitation-box__label">Judge collinearity</span>
-          Five of eight evaluation categories intercorrelate at r > 0.80. The three low-correlation categories (attribution, persistence, disentanglement) carry disproportionate weight. Style-stripped probes, mechanistic interpretability, or ideally probing the model's activation space for persona vectors (as in Chen et al. 2025) would help resolve whether the model genuinely has separable surface and deep persona components.
+          <span class="limitation-box__label">Judge collinearity and calibration</span>
+          Five of eight evaluation categories intercorrelate at r > 0.80, likely sharing a common "sounds like C-3PO" factor. The disentanglement category partially controls for this (identity_survival dissociates from style_compliance), but we have not run the definitive calibration check: scoring the training data itself to verify that the judge correctly assigns low "deep persona" scores to third-person encyclopedic text (doc_neutral training examples) while scoring first-person dialogue high. If the judge scores doc_neutral training examples high on identity or compositional inference despite their encyclopedic register, the scoring pipeline is style-contaminated. Probing activation space for persona vectors (Chen et al. 2025) would resolve the surface-vs-deep question independent of any judge.
+        </div>
+
+        <div class="limitation-box">
+          <span class="limitation-box__label">Token-count asymmetry</span>
+          Document conditions train on ~1.7× more tokens per example than dialogue conditions. While the headline finding (dlg_c3po > doc_c3po despite fewer tokens) argues against a pure token-count explanation, comparisons between format types (doc_neutral vs. dlg_neutral) are confounded. A controlled replication should equalize total trainable tokens across conditions.
         </div>
 
         <div class="limitation-box">
@@ -566,7 +579,7 @@ code {
 
       <div class="margin-note" id="note-model" style="margin-top:16rem;">
         <span class="margin-note__label">model</span>
-        Qwen3-4B-Instruct-2507. Small enough for single-GPU training, large enough to exhibit complex persona behaviors. LoRA rank 64, 2 epochs, no system prompt. 500 samples per condition.
+        Qwen3-4B-Instruct-2507. Small enough for single-GPU training, large enough to exhibit complex persona behaviors. LoRA rank 64, 3 epochs trained, epoch-2 checkpoint evaluated. No system prompt. 500 samples per condition.
       </div>
 
       <div class="margin-note" id="note-design" style="margin-top:16rem;">
