@@ -303,16 +303,7 @@ html.hp-arriving.hp-arrive-fade #page-transition{
           <span class="dots"><span></span><span></span><span></span></span>
           <span class="pondering-text">pondering...</span>
         </div>
-        <div id="hp-blog-entries">
-          <a class="hp-blog-item typed-hidden" data-type="line" data-speed="3" data-group="3" href="blog/alignment-problem-deep-learning.html">
-            <span class="date">2026.02</span>
-            <span class="title">The alignment problem in 2026: what the evidence says</span>
-          </a>
-          <a class="hp-blog-item typed-hidden" data-type="line" data-speed="2" data-group="4" href="blog/alignment-as-selective-generalization-stability.html">
-            <span class="date">2026.03</span>
-            <span class="title">Alignment as selective generalization stability</span>
-          </a>
-        </div>
+        <div id="hp-blog-entries"></div>
         <div class="hp-pondering-more" id="hp-pondering-more">
           <span class="dots"><span></span><span></span><span></span></span>
           <span class="pondering-more-text">pondering more</span>
@@ -322,7 +313,7 @@ html.hp-arriving.hp-arrive-fade #page-transition{
         <div class="hp-sec-label gen typed-hidden" data-type="instant" data-group="5"><span class="tag">output</span> Publications</div>
         <a class="hp-paper-item typed-hidden" data-type="fade" data-group="6" href="papers.html#reasoning-traces">
           <div class="paper-title">Reasoning Traces Shape Outputs but Models Won't Say So</div>
-          <div class="paper-meta"><strong>Yijie Hao*</strong>, Lingjie Chen*, Ali Emami, Joyce Ho — ACL 2026</div>
+          <div class="paper-meta"><strong>Yijie Hao*</strong>, Lingjie Chen*, Ali Emami, Joyce Ho — ACL 2026 Main</div>
         </a>
         <a class="hp-paper-item typed-hidden" data-type="fade" data-group="7" href="papers.html#intent-hallucination">
           <div class="paper-title">Beyond Facts: Evaluating Intent Hallucination in Large Language Models</div>
@@ -654,6 +645,40 @@ html.hp-arriving.hp-arrive-fade #page-transition{
 })();
 </script>
 
+<!-- Auto-populate blog entries from blog.html -->
+<script>
+(function(){
+  window._blogReady = new Promise(function(resolve){
+    var container = document.getElementById('hp-blog-entries');
+    if(!container){ resolve(); return; }
+    fetch('blog.html')
+      .then(function(r){ return r.text(); })
+      .then(function(html){
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var entries = doc.querySelectorAll('.blog-entry');
+        var count = Math.min(2, entries.length);
+        for(var i = 0; i < count; i++){
+          var entry = entries[i];
+          var date = entry.querySelector('.blog-entry__date');
+          var titleLink = entry.querySelector('.blog-entry__title a');
+          if(!date || !titleLink) continue;
+          var a = document.createElement('a');
+          a.className = 'hp-blog-item typed-hidden';
+          a.setAttribute('data-type', 'line');
+          a.setAttribute('data-speed', i === 0 ? '3' : '2');
+          a.setAttribute('data-group', String(3 + i));
+          a.href = titleLink.getAttribute('href');
+          a.innerHTML = '<span class="date">' + date.textContent + '</span>' +
+                        '<span class="title">' + titleLink.textContent + '</span>';
+          container.appendChild(a);
+        }
+        resolve();
+      })
+      .catch(function(){ resolve(); });
+  });
+})();
+</script>
+
 <!-- Homepage typing animation (v8: chromatic aberration, pondering-more, fade publications, bottom cursor) -->
 <script>
 (function(){
@@ -875,6 +900,8 @@ html.hp-arriving.hp-arrive-fade #page-transition{
     var contentEl = document.querySelector('.hp-content');
     if(contentEl) contentEl.scrollTop = 0;
 
+    /* Wait for blog entries to load before running animations */
+    (window._blogReady || Promise.resolve()).then(function(){
     var hp = document.getElementById('homepage');
     var arriving = sessionStorage.getItem('dissolve-arriving');
     var visited = sessionStorage.getItem('hp-typed');
@@ -916,6 +943,7 @@ html.hp-arriving.hp-arrive-fade #page-transition{
         if(window.startHomepageTyping) window.startHomepageTyping();
       }, 900);
     }, 800);
+    }); /* end _blogReady.then */
   });
 })();
 </script>
