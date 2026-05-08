@@ -441,6 +441,14 @@ function toggleDetails(btn){
       setTimeout(function(){ window.location.href = href; }, 320);
     }
   });
+  /* Fix bfcache: clear overlay when restored via back/forward */
+  window.addEventListener('pageshow', function(e){
+    if(e.persisted){
+      if(overlay){ overlay.classList.remove('active','ocean'); }
+      var page = document.querySelector('.page');
+      if(page) page.classList.remove('dissolve');
+    }
+  });
 })();
 
 // Highlight target paper on hash navigation

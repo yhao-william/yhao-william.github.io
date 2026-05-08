@@ -965,6 +965,17 @@ html.hp-arriving.hp-arrive-fade #page-transition{
       window.location.href = href;
     }, 320);
   });
+
+  /* Fix bfcache: clear overlay when restored via back/forward */
+  window.addEventListener('pageshow', function(e){
+    if(e.persisted){
+      if(overlay){
+        overlay.classList.remove('active','ocean');
+        overlay.style.opacity = '';
+      }
+      document.documentElement.classList.remove('hp-arriving');
+    }
+  });
 })();
 </script>
 </body>
