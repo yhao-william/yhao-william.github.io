@@ -35,19 +35,23 @@
 body.top{background:#fff!important;}
 
 
-/* Parchment column — floats on the ocean */
+/* Grid paper column — floats on the ocean */
 .hp-column{
   width:100%;max-width:740px;height:100vh;
   display:grid;grid-template-rows:auto 1fr auto;
   padding:3.5vh clamp(1.5rem, 5vw, 5rem);
   overflow:hidden;position:relative;
-  background:rgba(235,225,205,0.92);
+  background:rgba(244,243,238,0.88);
+  background-image:
+    linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+  background-size:32px 32px;
   -webkit-mask-image:linear-gradient(90deg,
-    rgba(0,0,0,0.40) 0%, rgba(0,0,0,0.70) 1.5%, black 4%,
-    black 96%, rgba(0,0,0,0.70) 98.5%, rgba(0,0,0,0.40) 100%);
+    rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.75) 1.5%, black 4%,
+    black 96%, rgba(0,0,0,0.75) 98.5%, rgba(0,0,0,0.45) 100%);
   mask-image:linear-gradient(90deg,
-    rgba(0,0,0,0.40) 0%, rgba(0,0,0,0.70) 1.5%, black 4%,
-    black 96%, rgba(0,0,0,0.70) 98.5%, rgba(0,0,0,0.40) 100%);
+    rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.75) 1.5%, black 4%,
+    black 96%, rgba(0,0,0,0.75) 98.5%, rgba(0,0,0,0.45) 100%);
 }
 
 /* Entrance: paper starts submerged by default */
@@ -71,7 +75,11 @@ html.hp-instant #homepage{
 /* Page-transition overlay */
 #page-transition{
   position:fixed;top:0;left:0;width:100%;height:100%;
-  background:rgba(235,225,205,0.95);
+  background:rgba(244,243,238,0.92);
+  background-image:
+    linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px);
+  background-size:32px 32px;
   opacity:0;pointer-events:none;
   z-index:9999;
   transition:opacity 0.3s ease;
@@ -87,17 +95,12 @@ html.hp-arriving.hp-arrive-fade #page-transition{
   transition:opacity 0.5s ease-out;
 }
 
-/* Parchment texture — sits at the bottom, above bg color */
-#parchment-tex{
-  position:absolute;top:0;left:0;width:100%;height:100%;
-  pointer-events:none;z-index:0;opacity:0.6;
-}
-/* Wet-stain overlay — sits above parchment, below text */
+/* Wet-stain overlay — sits above paper bg, below text */
 #wet-stain{
   position:absolute;top:0;left:0;width:100%;height:100%;
   pointer-events:none;z-index:0;
 }
-.hp-column > *:not(#wet-stain):not(#parchment-tex){
+.hp-column > *:not(#wet-stain){
   position:relative;z-index:1;
 }
 
@@ -280,7 +283,6 @@ html.hp-arriving.hp-arrive-fade #page-transition{
 <!-- Homepage content -->
 <div id="homepage">
   <div class="hp-column">
-    <canvas id="parchment-tex" aria-hidden="true"></canvas>
     <canvas id="wet-stain"></canvas>
     <div class="hp-header">
       <div class="hp-header__name">Yijie Hao</div>
@@ -526,103 +528,7 @@ html.hp-arriving.hp-arrive-fade #page-transition{
 })();
 </script>
 
-<!-- Parchment texture: procedural fibers, speckles, aging -->
-<script>
-(function(){
-  window.renderParchment = function(){
-    var c = document.getElementById('parchment-tex');
-    var col = document.querySelector('.hp-column');
-    if(!c || !col) return;
-    var rect = col.getBoundingClientRect();
-    var W = Math.round(rect.width), H = Math.round(rect.height);
-    /* render at half-res for performance, CSS scales up */
-    var scale = 0.5;
-    var cw = Math.round(W * scale), ch = Math.round(H * scale);
-    c.width = cw; c.height = ch;
-    c.style.width = W + 'px'; c.style.height = H + 'px';
-    var ctx = c.getContext('2d');
-
-    var SEED = 42;
-    function hash(x,y){
-      var n = x*374761393 + y*668265263 + SEED;
-      n = (n^(n>>13))*1274126177;
-      return ((n^(n>>16))&0x7fffffff)/0x7fffffff;
-    }
-    function lerp(a,b,t){return a+(b-a)*t;}
-    function smooth(t){return t*t*(3-2*t);}
-    function noise2d(x,y){
-      var ix=Math.floor(x),iy=Math.floor(y);
-      var fx=smooth(x-ix),fy=smooth(y-iy);
-      return lerp(lerp(hash(ix,iy),hash(ix+1,iy),fx),
-                  lerp(hash(ix,iy+1),hash(ix+1,iy+1),fx),fy);
-    }
-    function fbm(x,y,oct){
-      var v=0,amp=0.5,freq=1;
-      for(var i=0;i<(oct||5);i++){v+=amp*noise2d(x*freq,y*freq);amp*=0.5;freq*=2.1;}
-      return v;
-    }
-
-    var img = ctx.createImageData(cw,ch);
-    var d = img.data;
-
-    for(var y=0;y<ch;y++){
-      for(var x=0;x<cw;x++){
-        var idx=(y*cw+x)*4;
-        var nx=x/cw, ny=y/ch;
-
-        /* Large-scale color variation (warm patches) */
-        var base = fbm(nx*3.0+1.2, ny*4.0+0.8, 4);
-
-        /* Medium fibers — horizontal bias like real parchment */
-        var fiber1 = fbm(nx*12.0+5.3, ny*6.0+2.1, 4);
-        var fiber2 = fbm(nx*8.0+9.7, ny*18.0+4.3, 3);
-        var fiber = fiber1*0.6 + fiber2*0.4;
-
-        /* Fine grain / speckle */
-        var grain = noise2d(nx*60+3.3, ny*80+7.7);
-        var speck = noise2d(nx*120+11.1, ny*150+13.3);
-
-        /* Edge darkening (vignette) */
-        var ex = (nx-0.5)*2.0, ey = (ny-0.5)*2.0;
-        var vignette = 1.0 - (ex*ex*0.15 + ey*ey*0.08);
-        vignette = Math.max(0, Math.min(1, vignette));
-
-        /* Combine into color channels */
-        /* Base parchment: warm cream with subtle variation */
-        var r = 180 + base*35 + fiber*18 + grain*10 - (1-vignette)*40;
-        var g = 165 + base*25 + fiber*12 + grain*8 - (1-vignette)*45;
-        var b = 135 + base*15 + fiber*6 + grain*5 - (1-vignette)*35;
-
-        /* Random dark speckles (age spots) */
-        if(speck > 0.92){
-          var spot = (speck - 0.92) * 12.5; /* 0..1 */
-          r -= spot * 50;
-          g -= spot * 45;
-          b -= spot * 30;
-        }
-
-        /* Very faint foxing (reddish-brown age marks) */
-        var fox = fbm(nx*25+17.0, ny*30+21.0, 3);
-        if(fox > 0.65){
-          var fi = (fox - 0.65) * 2.86;
-          r += fi * 15;
-          g -= fi * 8;
-          b -= fi * 12;
-        }
-
-        d[idx]   = Math.max(0,Math.min(255,Math.round(r)));
-        d[idx+1] = Math.max(0,Math.min(255,Math.round(g)));
-        d[idx+2] = Math.max(0,Math.min(255,Math.round(b)));
-        d[idx+3] = 255;
-      }
-    }
-    ctx.putImageData(img,0,0);
-  };
-  window.addEventListener('resize', function(){ if(window.renderParchment) window.renderParchment(); });
-})();
-</script>
-
-<!-- Wet-stain overlay: ink/tea stain darkens parchment edges -->
+<!-- Wet-stain overlay: water darkens paper edges -->
 <script>
 (function(){
   window.renderWetStain = function(){
@@ -667,7 +573,7 @@ html.hp-arriving.hp-arrive-fade #page-transition{
     var edgeL = W * edgeFrac;
     var edgeR = W * (1 - edgeFrac);
 
-    var stainR = 120, stainG = 90, stainB = 55;
+    var stainR = 75, stainG = 68, stainB = 140;
 
     var imgData = ctx.createImageData(W, H);
     var d = imgData.data;
@@ -1005,7 +911,6 @@ html.hp-arriving.hp-arrive-fade #page-transition{
     /* ── Case 1: returning from sub-page (dissolve-arrive) ── */
     if(arriving){
       sessionStorage.removeItem('dissolve-arriving');
-      if(window.renderParchment) setTimeout(window.renderParchment, 200);
       if(window.renderWetStain) setTimeout(window.renderWetStain, 200);
       /* Overlay is already visible via html.hp-arriving (blocking script).
          Now trigger the fade-out. */
@@ -1020,7 +925,6 @@ html.hp-arriving.hp-arrive-fade #page-transition{
 
     /* ── Case 2: revisit within same session (skip entrance) ── */
     if(visited){
-      if(window.renderParchment) setTimeout(window.renderParchment, 200);
       if(window.renderWetStain) setTimeout(window.renderWetStain, 200);
       showAllInstant();
       return;
@@ -1031,7 +935,6 @@ html.hp-arriving.hp-arrive-fade #page-transition{
     /* #homepage is already hidden via CSS (opacity:0, translateY:40px).
        Render wet-stain NOW while paper is invisible, so it's ready
        before the paper surfaces — no "clean white" flash. */
-    if(window.renderParchment) window.renderParchment();
     if(window.renderWetStain) window.renderWetStain();
 
     /* Let the ocean breathe for a moment, then surface */
