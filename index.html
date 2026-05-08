@@ -35,17 +35,13 @@
 body.top{background:#fff!important;}
 
 
-/* Grid paper column — floats on the ocean */
+/* Paper column — floats on the ocean */
 .hp-column{
   width:100%;max-width:740px;height:100vh;
   display:grid;grid-template-rows:auto 1fr auto;
   padding:3.5vh clamp(1.5rem, 5vw, 5rem);
   overflow:hidden;position:relative;
-  background:rgba(244,243,238,0.88);
-  background-image:
-    linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
-  background-size:32px 32px;
+  background-color:rgba(244,243,238,0.88);
   -webkit-mask-image:linear-gradient(90deg,
     rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.75) 1.5%, black 4%,
     black 96%, rgba(0,0,0,0.75) 98.5%, rgba(0,0,0,0.45) 100%);
@@ -75,11 +71,7 @@ html.hp-instant #homepage{
 /* Page-transition overlay */
 #page-transition{
   position:fixed;top:0;left:0;width:100%;height:100%;
-  background:rgba(244,243,238,0.92);
-  background-image:
-    linear-gradient(rgba(0,0,0,0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,0,0,0.035) 1px, transparent 1px);
-  background-size:32px 32px;
+  background-color:rgba(244,243,238,0.92);
   opacity:0;pointer-events:none;
   z-index:9999;
   transition:opacity 0.3s ease;
@@ -257,6 +249,7 @@ html.hp-arriving.hp-arrive-fade #page-transition{
   .hp-footer{flex-wrap:wrap;}
 }
 </style>
+<script src="paper-noise.js"></script>
 </head>
 <body class="top page-ready" data-canvasmode="white">
 
